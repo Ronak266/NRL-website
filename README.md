@@ -30,7 +30,7 @@ For the editable source, open `index.html` alongside its `assets` folder. Rebuil
 python scripts/build-preview.py
 ```
 
-The site uses blue, mint, coral and lavender sections. Video has a visible play button, native controls and chapter navigation. The simulation is a silent visual study, not a physics simulation.
+The site uses a crimson-and-black anime-inspired theme with manga panel borders, halftone textures, speed lines and red arena lighting. Video has a visible play button, native controls and chapter navigation. The simulation is a silent visual study, not a physics simulation.
 
 Public GitHub Pages publication is pending owner authorization.
 
