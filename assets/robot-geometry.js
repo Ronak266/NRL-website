@@ -1,17 +1,18 @@
 // Shared geometry for the WebGL and Canvas renderers. Y is up; +Z is the intake.
 export const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
 export function offsetPart(part,separation){
-  const amount=clamp(separation*1.5-part.g*.16);
+  const t=clamp((separation-(part.delay??part.g*.12))/(1-(part.delay??part.g*.12)));
+  const amount=t*t*(3-2*t);
   return part.p.map((v,i)=>v+(part.explode?.[i]||0)*amount);
 }
-export function projectPoint(point,{yaw,pitch,width,height,scale=1}){
+export function projectPoint(point,{yaw,pitch,width,height,scale=1,distance=8}){
   let [x,y,z]=point;
   const xx=x*Math.cos(yaw)+z*Math.sin(yaw);
   let zz=x*Math.sin(yaw)-z*Math.cos(yaw);
   y-=.78;
   const yy=y*Math.cos(pitch)+zz*Math.sin(pitch);
   zz=-y*Math.sin(pitch)+zz*Math.cos(pitch);
-  const f=Math.min(width*1.15,height*1.8)*scale/(8+zz);
+  const f=Math.min(width*1.15,height*1.8)*scale/Math.max(1,distance+zz);
   return [width/2+xx*f,height*.52-yy*f,zz];
 }
 export function polygonsFor(parts,separation,view,spin=0){
@@ -30,10 +31,20 @@ export function polygonsFor(parts,separation,view,spin=0){
       const u=b.map((v,i)=>v-a[i]),v=c.map((v,i)=>v-a[i]);
       const n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];
       const length=Math.hypot(...n)||1;
-      const light=.48+.58*Math.abs((n[0]*-.4+n[1]*.85+n[2]*.35)/length);
+      const diffuse=Math.abs((n[0]*-.4+n[1]*.85+n[2]*.35)/length);
+      const metallic=part.material==='metal';
+      const light=.42+.62*diffuse+(metallic?.22*Math.pow(diffuse,14):0);
       const points=face.map(i=>verts[i]);
-      polygons.push({points,z:points.reduce((s,p)=>s+p[2],0)/points.length,color:rgb.map(c=>Math.min(255,Math.round(c*light))),alpha:part.alpha??1,name:part.name});
+      polygons.push({points,z:points.reduce((s,p)=>s+p[2],0)/points.length,color:rgb.map(c=>Math.min(255,Math.round(c*light))),alpha:part.alpha??1,name:part.name,system:part.system,material:part.material});
     }
   }
   return polygons.sort((a,b)=>b.z-a.z);
+}
+export function fitPolygons(polygons,width,height,padding=30){
+ let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+ for(const p of polygons)for(const [x,y] of p.points){minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);}
+ if(!polygons.length)return polygons;
+ const scale=Math.min((width-2*padding)/Math.max(1,maxX-minX),(height-2*padding)/Math.max(1,maxY-minY));
+ const cx=(minX+maxX)/2,cy=(minY+maxY)/2;
+ return polygons.map(p=>({...p,points:p.points.map(([x,y,z])=>[width/2+(x-cx)*scale,height/2+(y-cy)*scale,z])}));
 }

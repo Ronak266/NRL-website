@@ -15,6 +15,7 @@ def embed(m):
  if not mime:return m.group(0)
  encoded=base64.b64encode((ROOT/path).read_bytes()).decode()
  return attr+'="data:'+mime+';base64,'+encoded+'"'
+html=html.replace('href="assets/forge-simulation.mp4" download','href="#" download')
 html=re.sub(r'(src|poster|href)="(assets/[^\"]+)"',embed,html)
 # Embed fonts as well, preserving the exact layout offline.
 html=re.sub(r"url\('(?P<path>assets/[^']+\.ttf)'\)",lambda m:"url('data:font/ttf;base64,"+base64.b64encode((ROOT/m['path']).read_bytes()).decode()+"')",html)

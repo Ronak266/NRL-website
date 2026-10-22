@@ -3,9 +3,9 @@ Titan Forge — National Robotics League team. Interactive robot assembly, team 
 
 ## Interactive experiences
 
-- Scroll-driven photo-referenced Hyperdrive robot assembly, full 360° orbit by dragging or using the rotation slider, exploded view, and wireframe.
-- Live perspective 3D rendering runs on Canvas with embedded geometry, including automatic hero rotation, drag orbit, scroll assembly, exploded view and wireframe. It works without WebGL, imports or fetch requests.
-- The simulation theatre contains an original silent 12-second, 1280×720 H.264 animation, native playback controls, chapter buttons, and an MP4 download.
+- Wide scroll-driven Hyperdrive component breakdown with 147 independent parts and ten continuous wire meshes, full 360° orbit by dragging or using the rotation slider, exploded view, and wireframe.
+- Live perspective 3D rendering runs on Canvas with embedded geometry, including automatic hero rotation, drag orbit, scroll disassembly, subsystem isolation, exploded view and wireframe. It works without WebGL, imports or fetch requests.
+- The simulation theatre contains an original silent 18-second, 30 fps, 1280×720 H.264 animation, native playback controls, chapter buttons, and an MP4 download.
 - All robot visuals are visualizations based on the supplied prototype photos; dimensions are approximate and motion is illustrative.
 - Global pause and reduced-motion support; video never autoplays and pauses when offscreen.
 
@@ -35,3 +35,5 @@ The site uses blue, mint, coral and lavender sections. Video has a visible play 
 Public GitHub Pages publication is pending owner authorization.
 
 Hyperdrive source research and modeling limits: [reference notes](docs/hyperdrive-reference-notes.md).
+
+Geometry checks: `node --test scripts/geometry.test.mjs`. Tests cover independent wire routes, assembled positions and clipping at mobile/desktop widths across camera angles.

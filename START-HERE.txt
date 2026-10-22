@@ -10,9 +10,9 @@ from inside the ZIP viewer and do not move it away from the assets folder.
 
 WHAT TO TRY
 1. The robot rotates in 3D on the home screen. Drag it to inspect it.
-2. Explore in 3D takes you to scroll assembly, rotate, explode and wireframe.
-3. Watch the Film takes you to a real 12-second video. Click WATCH SIMULATION.
-4. Choose Assemble, Inspect or Activate to seek to a chapter.
+2. Explore in 3D takes you to a full-width scroll breakdown with separation slider, subsystem buttons and wireframe.
+3. Watch the Film takes you to a rendered 18-second video. Click WATCH SIMULATION.
+4. Choose Disassemble, Every Detail or Reassemble to seek to a chapter.
 5. Team profiles open when clicked. Photos and introductions await your content.
 
 HOSTING

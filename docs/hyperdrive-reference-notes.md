@@ -25,3 +25,6 @@ Regenerate:
 python scripts/build-hyperdrive-model.py
 python scripts/render-simulation.py
 ```
+
+## Detailed explorer update
+The shared mesh now contains 147 independent components and ten continuous wire routes. Tyre tread is integral to each tyre. Additional visible hub bolts, axles, endcaps and terminal details support inspection; exact hidden wiring and hardware are illustrative. Each wire disconnects as one curved object, rather than scattering its tube segments. Both the interactive renderer and the 18-second studio video use the same staggered part offsets.

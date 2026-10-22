@@ -6,7 +6,7 @@ function mountViewer(host,fallback,{hero=false}={}){
  canvas.className='robot-canvas';canvas.setAttribute('role','img');
  canvas.setAttribute('aria-label',hero?'Animated three-dimensional Hyperdrive chassis. Drag to rotate.':'Interactive Hyperdrive chassis. Drag to rotate, or use the rotation, assembly and wireframe controls.');
  host.append(canvas);fallback.style.display='none';host.classList.add('has-3d');
- if(!hero)document.querySelector('#render-status').textContent='LIVE 3D · DRAG TO ROTATE';
+ if(!hero)document.querySelector('#render-status').textContent='LIVE 3D · 147 COMPONENTS';
  let w=0,h=0,yaw=.55,pitch=.56,visible=true,drag=false,x=0,y=0,previous=0,frames=0;
  const rotate=document.querySelector('#rotate'),reduced=matchMedia('(prefers-reduced-motion: reduce)');
  if(!hero){rotate.min=-180;rotate.max=180;rotate.value=32;rotate.setAttribute('aria-label','Orbit Hyperdrive chassis');rotate.addEventListener('input',()=>yaw=Number(rotate.value)*Math.PI/180);}
@@ -23,21 +23,30 @@ function mountViewer(host,fallback,{hero=false}={}){
   const dt=Math.min((time-previous)/1000,.06);previous=time;
   const frozen=document.body.classList.contains('paused')||reduced.matches;
   if(hero&&!frozen&&!heroPaused&&!drag)yaw+=dt*.22;
-  const view={yaw,pitch,width:w,height:h,scale:hero?.93:1};
-  ctx.globalAlpha=1;ctx.clearRect(0,0,w,h);
-  if(!hero){const bg=ctx.createLinearGradient(0,0,w,h);bg.addColorStop(0,'#152c60');bg.addColorStop(1,'#111e40');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);}
-  const line=(points,color)=>{ctx.beginPath();points.forEach((p,i)=>{const v=projectPoint(p,view);i?ctx.lineTo(v[0],v[1]):ctx.moveTo(v[0],v[1]);});ctx.strokeStyle=color;ctx.lineWidth=.6;ctx.stroke();};
-  for(let j=-5;j<=5;j++){line([[j,0,-5],[j,0,5]],hero?'#315ab11e':'#91b9ff24');line([[-5,0,j],[5,0,j]],hero?'#315ab11e':'#91b9ff24');}
-  const p=Number(document.querySelector('#percent').textContent)/100;
-  const exploded=!hero&&document.querySelector('#explode').getAttribute('aria-pressed')==='true';
-  const separation=hero?0:exploded?1:frozen?0:1-p;
+  const separation=hero?0:Number(host.dataset.separation||0);
+  const view={yaw,pitch,width:w,height:h,scale:hero?.93:1,distance:8+separation*9};
+  const focus=hero?'all':host.dataset.system||'all';
   const wire=!hero&&document.querySelector('#wire').getAttribute('aria-pressed')==='true';
-  for(const {points,color,alpha,name} of polygonsFor(parts,separation,view)){
-   ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();
-   if(!wire){ctx.globalAlpha=alpha;ctx.fillStyle='rgb('+color.join(',')+')';ctx.fill();}
-   ctx.globalAlpha=wire?.8:alpha<1?.45:.28;
-   ctx.strokeStyle=wire?'#9df1e8':name.includes('Rubber')||name.includes('tread')?'#526b8a':hero?'#6d92c9':'#b2cad1';ctx.lineWidth=wire?.6:.35;ctx.stroke();
+  ctx.globalAlpha=1;ctx.clearRect(0,0,w,h);
+  if(!hero){
+   const bg=ctx.createLinearGradient(0,0,w,h);bg.addColorStop(0,'#f6fbfd');bg.addColorStop(.5,'#e8f1f8');bg.addColorStop(1,'#dceaf2');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+   ctx.lineWidth=.6;ctx.strokeStyle='#638da513';
+   for(let i=0;i<w;i+=36){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,h);ctx.stroke();}
+   for(let i=0;i<h;i+=36){ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(w,i);ctx.stroke();}
   }
+  // Soft contact shadow grounds the assembled chassis and fades during disassembly.
+  ctx.save();ctx.translate(w*.5,h*.77);ctx.scale(1,.21);
+  const shadow=ctx.createRadialGradient(0,0,2,0,0,w*.3);shadow.addColorStop(0,'rgba(29,58,80,'+(.22-separation*.13)+')');shadow.addColorStop(1,'rgba(29,58,80,0)');ctx.fillStyle=shadow;ctx.fillRect(-w*.35,-w*.35,w*.7,w*.7);ctx.restore();
+  const scene=polygonsFor(parts,separation,view);
+  const polygons=fitPolygons(focus==='all'?scene:scene.filter(p=>p.system===focus),w,h,hero?Math.max(60,w*.1):Math.max(38,Math.min(w,h)*.08));
+  for(const {points,color,alpha,name,system,material} of polygons){
+   const selected=focus==='all'||focus===system;
+   ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();
+   if(!wire){ctx.globalAlpha=(selected?1:.065)*alpha;ctx.fillStyle='rgb('+color.join(',')+')';ctx.fill();}
+   ctx.globalAlpha=(selected?1:.08)*(wire?.8:material==='glass'?.55:material==='metal'?.16:.10);
+   ctx.strokeStyle=wire?(selected?'#247b83':'#aec4d4'):material==='glass'?'#7c9eae':material==='rubber'?'#0e1e2c':'#6f8b9e';ctx.lineWidth=wire?.55:material==='glass'?.65:.25;ctx.stroke();
+  }
+  host.dataset.renderedSeparation=separation.toFixed(3);
   ctx.globalAlpha=1;frames++;if(frames%15===0)host.dataset.frames=frames;
  }
  requestAnimationFrame(render);
@@ -47,6 +56,7 @@ mountViewer(document.querySelector('#lab-stage'),document.querySelector('#lab-ro
 
 // Video controls initialize separately from either renderer.
 const video=document.querySelector('#simulation-video'),videoScreen=document.querySelector('.sim-screen');
+document.querySelector('.sim-note a[download]').href=video.querySelector('source').src;
 const start=document.querySelector('#video-start'),playback=document.querySelector('#playback-status');
 let requestId=0;
 function ready(){
@@ -75,8 +85,8 @@ video.addEventListener('pause',()=>{videoScreen.classList.remove('is-playing');s
 video.addEventListener('ended',()=>{videoScreen.classList.remove('is-playing');start.textContent='REPLAY SIMULATION ↻';playback.textContent='Finished · choose a chapter or replay';});
 video.addEventListener('error',()=>{videoScreen.classList.remove('is-playing');playback.textContent='Video unavailable. Extract the entire ZIP, including the assets folder, or open Titan-Forge-Preview.html.';});
 video.addEventListener('timeupdate',()=>{
- document.querySelector('#sim-time').textContent=video.currentTime.toFixed(1)+' / '+(Number.isFinite(video.duration)?video.duration.toFixed(1):'12.0')+'s';
- document.querySelectorAll('[data-chapter]').forEach((b,i)=>{const on=Math.min(2,Math.floor(video.currentTime/4))===i;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});
+ document.querySelector('#sim-time').textContent=video.currentTime.toFixed(1)+' / '+(Number.isFinite(video.duration)?video.duration.toFixed(1):'18.0')+'s';
+ document.querySelectorAll('[data-chapter]').forEach((b,i)=>{const on=Math.min(2,Math.floor(video.currentTime/6))===i;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});
 });
 new IntersectionObserver(entries=>{if(!entries[0].isIntersecting&&!video.paused)video.pause();},{threshold:0}).observe(video);
 document.querySelector('#motion').addEventListener('click',()=>{if(document.body.classList.contains('paused'))video.pause();});
