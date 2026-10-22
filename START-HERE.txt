@@ -1,0 +1,20 @@
+TITAN FORGE WEBSITE - HOW TO VIEW IT
+
+EASIEST: double-click Titan-Forge-Preview.html.
+This single file includes the 3D robot, video, poster and all website code.
+Open it in Chrome or Edge. It does not need a server or Python.
+
+FULL SOURCE: right-click the ZIP > Extract All, then open index.html.
+Keep index.html and the entire assets folder together. Do not open index.html
+from inside the ZIP viewer and do not move it away from the assets folder.
+
+WHAT TO TRY
+1. The robot rotates in 3D on the home screen. Drag it to inspect it.
+2. Explore in 3D takes you to scroll assembly, rotate, explode and wireframe.
+3. Watch the Film takes you to a real 12-second video. Click WATCH SIMULATION.
+4. Choose Assemble, Inspect or Activate to seek to a chapter.
+5. Team profiles open when clicked. Photos and introductions await your content.
+
+HOSTING
+GitHub repository > Settings > Pages > Deploy from a branch > main > / (root).
+Save, wait for deployment, then use the Visit Site link.
