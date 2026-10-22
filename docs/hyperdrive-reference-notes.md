@@ -28,3 +28,10 @@ python scripts/render-simulation.py
 
 ## Detailed explorer update
 The shared mesh now contains 147 independent components and ten continuous wire routes. Tyre tread is integral to each tyre. Additional visible hub bolts, axles, endcaps and terminal details support inspection; exact hidden wiring and hardware are illustrative. Each wire disconnects as one curved object, rather than scattering its tube segments. Both the interactive renderer and the 18-second studio video use the same staggered part offsets.
+
+## Studio renderer revision
+The interactive viewer uses locally bundled Three.js physical materials, a generated softbox environment and shadow maps. Canvas remains available when WebGL cannot initialize. Video is rendered deterministically from the same geometry using the repository's CPU ray tracer, not a paid video service. The film uses slow camera orbit, disassembly and reassembly; it does not depict measured robot performance. Two photos cannot establish hidden geometry or exact wire routing.
+
+Visual references consulted for lighting and choreography (no third-party footage copied):
+- https://voyager.so/blog/cad-model-to-product-animation
+- https://www.nodeconnector.com/case-studies/procedural-assembly

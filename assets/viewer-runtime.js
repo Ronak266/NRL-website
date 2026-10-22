@@ -1,6 +1,7 @@
 // This file is combined with the model and geometry by scripts/build-preview.py.
 // Classic script: no imports, fetch requests, or WebGL are required.
-function mountViewer(host,fallback,{hero=false}={}){
+function mountViewer(host,fallback,{hero=false,softwareOnly=false}={}){
+ if(!softwareOnly&&mountStudio(host,fallback,{hero}))return;
  const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
  if(!ctx)return;
  canvas.className='robot-canvas';canvas.setAttribute('role','img');
@@ -29,14 +30,14 @@ function mountViewer(host,fallback,{hero=false}={}){
   const wire=!hero&&document.querySelector('#wire').getAttribute('aria-pressed')==='true';
   ctx.globalAlpha=1;ctx.clearRect(0,0,w,h);
   if(!hero){
-   const bg=ctx.createLinearGradient(0,0,w,h);bg.addColorStop(0,'#150a15');bg.addColorStop(.5,'#260b1c');bg.addColorStop(1,'#0b080e');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
-   ctx.lineWidth=.6;ctx.strokeStyle='#ff31561c';
+   const bg=ctx.createLinearGradient(0,0,w,h);bg.addColorStop(0,'#141418');bg.addColorStop(.5,'#24242a');bg.addColorStop(1,'#0d0d11');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+   ctx.lineWidth=.6;ctx.strokeStyle='#ffffff06';
    for(let i=0;i<w;i+=36){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,h);ctx.stroke();}
    for(let i=0;i<h;i+=36){ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(w,i);ctx.stroke();}
   }
   // Soft contact shadow grounds the assembled chassis and fades during disassembly.
   ctx.save();ctx.translate(w*.5,h*.77);ctx.scale(1,.21);
-  const shadow=ctx.createRadialGradient(0,0,2,0,0,w*.3);shadow.addColorStop(0,'rgba(255,25,70,'+(.22-separation*.13)+')');shadow.addColorStop(1,'rgba(255,25,70,0)');ctx.fillStyle=shadow;ctx.fillRect(-w*.35,-w*.35,w*.7,w*.7);ctx.restore();
+  const shadow=ctx.createRadialGradient(0,0,2,0,0,w*.3);shadow.addColorStop(0,'rgba(0,0,0,'+(.6-separation*.3)+')');shadow.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=shadow;ctx.fillRect(-w*.35,-w*.35,w*.7,w*.7);ctx.restore();
   const scene=polygonsFor(parts,separation,view);
   const polygons=fitPolygons(focus==='all'?scene:scene.filter(p=>p.system===focus),w,h,hero?Math.max(60,w*.1):Math.max(38,Math.min(w,h)*.08));
   for(const {points,color,alpha,name,system,material} of polygons){
@@ -44,7 +45,7 @@ function mountViewer(host,fallback,{hero=false}={}){
    ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();
    if(!wire){ctx.globalAlpha=(selected?1:.065)*alpha;ctx.fillStyle='rgb('+color.join(',')+')';ctx.fill();}
    ctx.globalAlpha=(selected?1:.08)*(wire?.8:material==='glass'?.55:material==='metal'?.16:.10);
-   ctx.strokeStyle=wire?(selected?'#ff5478':'#71334b'):material==='glass'?'#dd8ca5':material==='rubber'?'#7e4359':'#9b6278';ctx.lineWidth=wire?.55:material==='glass'?.65:.25;ctx.stroke();
+   ctx.strokeStyle=wire?(selected?'#ff5478':'#71334b'):material==='glass'?'#cce4ef':material==='rubber'?'#303238':'#b2bac0';ctx.lineWidth=wire?.55:material==='glass'?.65:.25;ctx.stroke();
   }
   host.dataset.renderedSeparation=separation.toFixed(3);
   ctx.globalAlpha=1;frames++;if(frames%15===0)host.dataset.frames=frames;

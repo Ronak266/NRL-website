@@ -33,7 +33,9 @@ export function polygonsFor(parts,separation,view,spin=0){
       const length=Math.hypot(...n)||1;
       const diffuse=Math.abs((n[0]*-.4+n[1]*.85+n[2]*.35)/length);
       const metallic=part.material==='metal';
-      const light=.42+.62*diffuse+(metallic?.22*Math.pow(diffuse,14):0);
+      const cameraNormal=(n[0]*Math.sin(view.yaw)*Math.cos(view.pitch)+n[1]*Math.sin(view.pitch)+n[2]*Math.cos(view.yaw)*Math.cos(view.pitch))/length;
+      const sheen=metallic?.32*Math.pow(Math.abs(cameraNormal),8):0;
+      const light=.24+.74*diffuse+sheen;
       const points=face.map(i=>verts[i]);
       polygons.push({points,z:points.reduce((s,p)=>s+p[2],0)/points.length,color:rgb.map(c=>Math.min(255,Math.round(c*light))),alpha:part.alpha??1,name:part.name,system:part.system,material:part.material});
     }

@@ -37,3 +37,16 @@ Public GitHub Pages publication is pending owner authorization.
 Hyperdrive source research and modeling limits: [reference notes](docs/hyperdrive-reference-notes.md).
 
 Geometry checks: `node --test scripts/geometry.test.mjs`. Tests cover independent wire routes, assembled positions and clipping at mobile/desktop widths across camera angles.
+
+### Studio-quality rendering
+The portable viewer includes Three.js locally and prefers physically based materials, studio reflections and shadow maps. WebGL failures automatically fall back to the Canvas renderer; no server or CDN is required. Open `Titan-Forge-Preview.html` after extracting the ZIP.
+
+To reproduce the CPU-rendered film (Python, C++ compiler with OpenMP, FFmpeg):
+```bash
+python3 scripts/prepare-raytrace.py
+g++ -O3 -fopenmp scripts/studio-raytrace.cpp -o dist/studio-raytrace
+dist/studio-raytrace dist/studio-triangles.txt dist/studio-frames 0 144
+python3 scripts/encode-studio.py
+python3 scripts/build-preview.py
+```
+The renderer produces 720p keyframes at 8 fps; FFmpeg interpolates the slow camera motion to 30 fps. This is a photo-referenced visualization, not recorded footage or measured CAD.
