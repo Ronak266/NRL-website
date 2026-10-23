@@ -70,7 +70,7 @@ function mountStudio(host,fallback,{hero=false}={}){
   // Physical orbital graphics and floating sparks give the hero spatial depth.
   const orbitals=new THREE.Group();scene.add(orbitals);
   const pulseLight=new THREE.PointLight(0xff214b,hero?18:0,18,2);pulseLight.position.set(-2,2,3);scene.add(pulseLight);
-  let scan=null;
+  let scan=null,ignition=0;
   if(hero){
    for(let i=0;i<3;i++){const ring=new THREE.Mesh(new THREE.TorusGeometry(3+i*.22,.014,6,120),new THREE.MeshBasicMaterial({color:i===1?0xff647f:0xa51635,transparent:true,opacity:.35}));ring.rotation.set(Math.PI/2+i*.22,0,i*.3);ring.position.y=.8;orbitals.add(ring);}
    const scanMaterial=new THREE.MeshBasicMaterial({color:0xff3154,transparent:true,opacity:.12,side:THREE.DoubleSide,depthWrite:false});scan=new THREE.Mesh(new THREE.PlaneGeometry(4.8,4.8),scanMaterial);scan.rotation.x=-Math.PI/2;scene.add(scan);
@@ -80,7 +80,7 @@ function mountStudio(host,fallback,{hero=false}={}){
    if(!visible||document.hidden||time-last<33)return;const dt=Math.min((time-last)/1000,.05);last=time;
    const frozen=document.body.classList.contains('paused')||reduced.matches;
    if(preset){const amount=frozen?1:1-Math.exp(-dt*7);yaw+=(preset[0]-yaw)*amount;pitch+=(preset[1]-pitch)*amount;rotate.value=Math.round(yaw*180/Math.PI);}
-   if(hero&&!frozen&&!paused){orbitals.rotation.y+=dt*.08;orbitals.rotation.z=Math.sin(time*.00025)*.10;pulseLight.intensity=18+Math.sin(time*.001)*7;scan.position.y=.35+(Math.sin(time*.00065)+1)*.7;heroTiltX+=(heroPointerX*.16-heroTiltX)*.06;heroTiltY+=(heroPointerY*.1-heroTiltY)*.06;}
+   if(hero&&!frozen&&!paused){ignition+=(Number(host.dataset.ignition||0)-ignition)*(1-Math.exp(-dt*3));orbitals.rotation.y+=dt*(.08+ignition*.22);orbitals.scale.setScalar(1+ignition*.08);orbitals.rotation.z=Math.sin(time*.00025)*.10;pulseLight.intensity=18+ignition*32+Math.sin(time*.001)*7;scan.material.opacity=.12+ignition*.12;scan.position.y=.35+(Math.sin(time*.00065)+1)*.7;heroTiltX+=(heroPointerX*.16-heroTiltX)*.06;heroTiltY+=(heroPointerY*.1-heroTiltY)*.06;}
    if(hero&&!paused&&!drag&&!frozen)yaw+=dt*.10;
    const separation=hero?0:Number(host.dataset.separation||0),focus=hero?'all':host.dataset.system||'all',wire=!hero&&document.querySelector('#wire').getAttribute('aria-pressed')==='true';
    for(const {mesh,part} of meshes){mesh.position.fromArray(offsetPart(part,separation));mesh.visible=focus==='all'||part.system===focus;mesh.material.wireframe=wire;mesh.material.emissive.setHex(mesh===selected?0x77142d:0x000000);const xray=!hero&&document.querySelector('#xray')?.getAttribute('aria-pressed')==='true';const glass=part.material==='glass';mesh.material.transparent=glass||xray;mesh.material.opacity=xray?(mesh===selected?1:.16):(glass?.24:1);mesh.material.depthWrite=!glass&&!xray;}
