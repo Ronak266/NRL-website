@@ -29,3 +29,80 @@
 .light-surface:hover:before{opacity:1}.paused .light-surface:before{opacity:0}
 @media(max-height:540px){.arena-shell:fullscreen .drive-footer,.arena-shell.expanded .drive-footer{padding:8px 14px;flex-direction:row}.arena-shell:fullscreen #drive-instructions,.arena-shell.expanded #drive-instructions{display:none}.arena-shell:fullscreen .arena-console,.arena-shell.expanded .arena-console{padding:8px 14px}.arena-shell:fullscreen .arena-topbar,.arena-shell.expanded .arena-topbar{padding:6px 14px}}
 @media(prefers-reduced-motion:reduce){.light-surface:before{display:none}.hero-art:before,.energy-active .hero-stamp{transition:none}}
+
+/* TITAN FORGE / anime opening. High contrast, inked edges and one red energy axis. */
+:root{--hot:#f4183e;--ink:#fff8f7;--panel:#100b10;--line:#f4183e40}
+body{background:#070507}
+body:after{content:'';position:fixed;inset:0;z-index:59;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 3px,#fae5e505 3px 4px);opacity:.25}
+header{background:#090609e8;border-bottom:1px solid #f4183e55;box-shadow:0 5px 30px #0009}
+header .brand{font-family:'Barlow Condensed',Impact,sans-serif;font-size:21px;font-style:italic;letter-spacing:.045em;transform:skew(-7deg)}
+header .mark{box-shadow:13px 0 0 #f4183e80}
+header nav a{text-transform:uppercase;letter-spacing:.14em;font-size:9px;font-weight:700}
+header nav a:hover{color:#fff}
+.scene-rail{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:39;display:grid;gap:4px;mix-blend-mode:normal}
+.scene-rail a{min-width:49px;height:47px;display:flex;align-items:center;justify-content:center;gap:8px;border-right:2px solid #ffffff45;background:#090609b8;color:#ab929b;transition:color .25s,background .25s,border-color .25s,width .3s var(--ease);overflow:hidden;white-space:nowrap}
+.scene-rail a b{font:italic 700 19px 'Barlow Condensed';letter-spacing:.05em}
+.scene-rail a span{font:700 8px ui-monospace,monospace;letter-spacing:.11em;max-width:0;opacity:0;transition:max-width .35s var(--ease),opacity .25s}
+.scene-rail a:hover,.scene-rail a[aria-current=location]{border-color:var(--hot);background:#290b15;color:#fff}
+.scene-rail a:hover{padding-left:14px;padding-right:14px}.scene-rail a:hover span{max-width:130px;opacity:1}
+.hero{background:radial-gradient(ellipse at 73% 58%,#61091f80,transparent 48%),linear-gradient(105deg,#090609 0 45%,#1b0810 61%,#070507 100%)}
+.hero:before{content:'';position:absolute;inset:-30% -20%;pointer-events:none;opacity:.38;background:repeating-linear-gradient(132deg,transparent 0 19px,#f4183e14 20px 21px,transparent 22px 80px);mask-image:linear-gradient(90deg,transparent 35%,black 80%)}
+.hero:after{content:'';position:absolute;right:24%;top:-25%;height:155%;width:clamp(18px,3vw,53px);background:linear-gradient(90deg,transparent,#f4183e2a 25%,#ff3256 48%,#f4183e44 70%,transparent);filter:drop-shadow(0 0 35px #f4183eaa);transform:rotate(22deg);pointer-events:none;opacity:.58}
+.hero .halo{display:block;position:absolute;inset:15% 9% 9% 10%;z-index:0;pointer-events:none;border:1px solid #f4183e35;clip-path:polygon(17% 0,100% 0,100% 82%,82% 100%,0 100%,0 17%);background:radial-gradient(circle at 50% 50%,#fa164018 1.1px,transparent 1.5px) 0 0/10px 10px;opacity:.8}
+.hero .cross{display:block;position:absolute;top:22%;right:2%;z-index:0;width:50%;height:55%;pointer-events:none;border-top:1px solid #ff3a5655;border-right:1px solid #ff3a5655;transform:skew(-18deg)}
+.hero-copy{filter:drop-shadow(7px 12px 17px #080408ae)}
+.eyebrow{color:#ffd4de;font-weight:700;display:flex;gap:11px;align-items:center;letter-spacing:.24em}
+.eyebrow-rule{width:30px;height:5px;background:var(--hot);transform:skew(-28deg);box-shadow:11px 0 0 #ff6784a8}
+.hero h1{line-height:.79;letter-spacing:-.04em;text-shadow:4px 6px 0 #430814,7px 10px 0 #0008}
+.hero h1 .hero-line:nth-child(2)>span{color:#ff2449;-webkit-text-stroke:1px #ffb1bd;text-shadow:3px 4px 0 #69091f,8px 10px 0 #080406}
+.hero .intro{font-weight:600;color:#e8c8d0;border-left:3px solid var(--hot);padding-left:16px;max-width:325px}
+.hero-sigil{position:absolute;top:10%;right:0;z-index:4;display:flex;flex-direction:column;text-align:right;color:#fff;opacity:.8;transform:rotate(7deg);pointer-events:none}
+.hero-sigil span{font:italic 700 68px/.74 'Barlow Condensed';-webkit-text-stroke:1px #ff748b;color:transparent}
+.hero-sigil small{font:700 8px/1.5 ui-monospace,monospace;letter-spacing:.16em;color:#ff8ea2;margin-top:11px}
+.hero-art:before{background:radial-gradient(ellipse,#a70b2d5c,transparent 68%);filter:blur(19px)}
+.hero .art-label{background:#f4183e;color:#fff;padding:8px 12px;clip-path:polygon(0 0,100% 0,95% 100%,0 100%);letter-spacing:.11em;font-weight:700}
+.robot-callout{position:absolute;left:19%;bottom:20%;z-index:5;display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:2px solid var(--hot);color:#ffc4d1;text-shadow:0 2px 12px #000;pointer-events:none}
+.robot-callout strong{font:italic 700 25px 'Barlow Condensed';color:#fff}
+.robot-callout span{font-size:8px}
+.hero-bottom{border-color:#f4183e77;color:#e5aabc}
+.hero-bottom:before{content:'';position:absolute;top:-4px;left:0;width:70px;height:6px;background:var(--hot);transform:skew(-35deg)}
+.hero.energy-active:after{opacity:1}
+.ticker{padding:18px 0;background:linear-gradient(90deg,#a60728,#ff2449 55%,#940620);box-shadow:0 10px 40px #f4183e35;border-top:2px solid #ff9cad;border-bottom:2px solid #510714}
+.manifesto{background:radial-gradient(ellipse at 100% 50%,#480a19 0,transparent 60%),#080608}
+.manifesto-pin:before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.32;background:radial-gradient(#ff4c6a50 .8px,transparent 1px) 0 0/8px 8px;mask-image:linear-gradient(90deg,transparent 35%,black 100%)}
+.manifesto-line{font-style:italic;transform:skew(-4deg);color:#382329}
+.manifesto-line:after{text-shadow:3px 5px 0 #5f0b22}
+.assembly{background:linear-gradient(#16080f,#080609 27%,#0c070a 85%)}
+.assembly-sticky{background:transparent}
+.lab-heading h2,.section-head h2,.mission h2{font-style:italic;letter-spacing:-.035em;text-shadow:3px 4px 0 #580b20}
+.lab-heading h2:after{content:'';display:block;width:80px;height:5px;background:var(--hot);margin-top:13px;transform:skew(-28deg);box-shadow:13px 0 0 #ff546e75}
+.section-head .mono,.lab-heading .mono{color:#ff8aa1;font-weight:700}
+.lab-stage,.drive-stage,.sim-screen{box-shadow:0 0 0 1px #f4183e4d,0 23px 70px #000a,inset 0 0 55px #f4183e0e}
+.lab-stage:before,.drive-stage:before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(135deg,#ff315244,transparent 15% 85%,#ff315233);clip-path:polygon(0 0,28% 0,0 28%,0 72%,28% 100%,72% 100%,100% 72%,100% 28%,72% 0)}
+.arena-section{background:radial-gradient(ellipse at 20% 0,#45091b,transparent 52%),#080507}
+.arena-shell{border-color:#f4183e80;box-shadow:12px 12px 0 #730d25,0 40px 100px #000a}
+.arena-watermark{font-style:italic;color:#ffffff50;text-shadow:3px 3px 0 #b20a31}
+.sim-section{background:linear-gradient(140deg,#090607,#1d0910 52%,#080608)}
+.sim-chapter.active{background:linear-gradient(90deg,#ef12332b,#1d0710 75%);border-left-width:4px}
+.video-start{transform:translate(-50%,-50%) skew(-6deg);border:1px solid #ffa3b5;text-shadow:1px 2px 0 #670917}
+.team{background:radial-gradient(circle at 85% 15%,#5b0a1d66,transparent 35%)}
+.dir-side{position:relative}.dir-side:before{content:'SQUAD';position:absolute;top:-24px;left:0;font:italic 700 65px 'Barlow Condensed';color:#ffffff08;pointer-events:none}
+.card{border:1px solid #ef193b50;background:#10090e;clip-path:polygon(0 0,100% 0,100% 93%,93% 100%,0 100%)}
+.card:hover{transform:translateY(-6px) rotate(-1deg);border-color:#ff637c;box-shadow:0 13px 40px #f4183e35}
+.portrait{background:radial-gradient(ellipse at 45% 100%,#a20a305e,transparent 64%),linear-gradient(135deg,#210a14,#090609)}
+.portrait:after{color:#f798ae}
+.portrait .mono{background:#e9173e;color:#fff;padding:6px 8px;transform:skew(-9deg)}
+.card-info{border-top:2px solid #e9163b}.card-foot b{color:#ff2449}
+.mission{background:linear-gradient(135deg,#3a0717,#12070d 45%,#070507)}
+.mission:before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.24;background:repeating-linear-gradient(128deg,transparent 0 18px,#f4183e4d 19px 20px,transparent 21px 55px);mask-image:linear-gradient(90deg,black,transparent 63%)}
+.gallery-tile{border:1px solid #f4183e54;clip-path:polygon(0 0,100% 0,100% 88%,93% 100%,0 100%)}
+.gallery-tile:first-child{background:radial-gradient(ellipse at 25% 50%,#a4133766,transparent 55%),#13070d}
+.gallery-tile:nth-child(2){background:radial-gradient(ellipse at 80% 10%,#8b102956,transparent 55%),#18080d}
+.gallery-tile h3{font-style:italic;text-shadow:2px 3px 0 #b8092b}
+.end{background:linear-gradient(111deg,#a60727,#f4183e 55%,#780519);border-top:3px solid #ff8298;box-shadow:0 -25px 70px #b30b3040}
+.end:before{content:'187';position:absolute;right:4%;top:-45%;font:italic 700 460px 'Barlow Condensed';color:#ffffff13;pointer-events:none}
+.end h2{font-style:italic;text-shadow:4px 5px 0 #70051d}
+@media(max-width:1100px){.scene-rail{display:none}.hero-sigil{right:4%;top:12%}}
+@media(max-width:760px){.hero:after{right:12%;top:25%;height:75%;opacity:.35}.hero .halo{inset:5% 15% 10% 0}.hero .cross{right:15%}.hero-sigil{top:57%;right:12%;transform:rotate(7deg) scale(.7);transform-origin:top right}.hero .art-label{right:22%}.robot-callout{left:22%;bottom:18%;font-size:6px}.hero h1{letter-spacing:-.045em;text-shadow:2px 3px 0 #410510}.hero h1 .hero-line:nth-child(2)>span{text-shadow:2px 3px 0 #65071d}.arena-shell{box-shadow:5px 5px 0 #730d25}.manifesto-line{transform:none}.card:hover{transform:none}.end:before{font-size:270px;top:-20%}}
+@media(max-width:390px){.hero-sigil,.robot-callout{display:none}.eyebrow{font-size:7px}.hero .art-label{right:24%}}
+@media(prefers-reduced-motion:reduce){.card:hover{transform:none}.video-start{transform:translate(-50%,-50%)}.scene-rail a{transition:none}}

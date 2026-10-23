@@ -64,6 +64,27 @@ document.addEventListener('keydown',event=>{
  }
 });
 
+// A compact chapter spine gives the long cinematic page a sense of place.
+const chapterLinks=[...document.querySelectorAll('.scene-rail a')];
+const chapters=chapterLinks.map(link=>({link,section:document.getElementById(link.dataset.scene)}));
+let chapterFrame=0;
+function updateChapter(){
+ if(chapterFrame)return;
+ chapterFrame=requestAnimationFrame(()=>{
+  chapterFrame=0;
+  const marker=innerHeight*.43;
+  let current=chapters[0];
+  for(const chapter of chapters)if(chapter.section.getBoundingClientRect().top<=marker)current=chapter;
+  for(const chapter of chapters){
+   if(chapter===current)chapter.link.setAttribute('aria-current','location');
+   else chapter.link.removeAttribute('aria-current');
+  }
+ });
+}
+addEventListener('scroll',updateChapter,{passive:true});
+addEventListener('resize',updateChapter,{passive:true});
+updateChapter();
+
 // Pointer lighting follows the surface, leaving text and hit targets still.
 if(matchMedia('(pointer:fine)').matches){
  for(const surface of document.querySelectorAll('.card,.gallery-tile,.sim-screen')){
