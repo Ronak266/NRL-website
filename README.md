@@ -50,3 +50,13 @@ python3 scripts/encode-studio.py
 python3 scripts/build-preview.py
 ```
 The renderer produces 720p keyframes at 8 fps; FFmpeg interpolates the slow camera motion to 30 fps. This is a photo-referenced visualization, not recorded footage or measured CAD.
+
+### Immersive 3D controls
+- **Drive it:** playable practice arena with keyboard (WASD/arrows), touch controls, Shift boost, wheel motion, eight collectible CORE rings, a demo route, reset, and chase/top/orbit cameras. Click **Take Control** to focus keyboard input; leaving the arena pauses it.
+- **Engineering explorer:** click components to identify them; open **Camera + X-ray** for four camera presets, zoom and X-ray rendering. System isolation, wireframe and progressive scroll disassembly remain available.
+- **Hero and team:** spatial orbital graphics, sparks, pointer-responsive directory cards and reading progress. Motion respects the global pause and reduced-motion preference.
+- All scenes have a Canvas fallback for WebGL failure. The practice arena is an illustrative mini-game, not an official NRL field or physics simulation.
+
+The supplied `file-navigator-landing (1).zip` informed spatial interaction direction. Its reference bundles depend on missing application/model/media files; they are not loaded or copied into the website. The original upload is unchanged.
+
+Checks: `node --test scripts/geometry.test.mjs scripts/arena.test.mjs`.

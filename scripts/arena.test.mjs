@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const source=fs.readFileSync(new URL('../assets/arena-physics.js',import.meta.url),'utf8');
+const {newDriveState,stepDrive,ringPositions}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
+test('forward movement and steering are controllable',()=>{let s=newDriveState();for(let i=0;i<60;i++)s=stepDrive(s,{throttle:1,steer:.2},1/60);assert.ok(s.z>1);assert.ok(s.x>0);assert.ok(s.yaw>0);});
+test('arena walls stop the robot without leaving playable bounds',()=>{let s=newDriveState();for(let i=0;i<1000;i++)s=stepDrive(s,{throttle:1,boost:true},.05);assert.equal(s.z,9);assert.equal(s.speed,0);assert.ok(Math.abs(s.x)<=9);});
+test('rings are collected once and state remains immutable',()=>{const [x,z]=ringPositions[0],old={...newDriveState(),x,z};const s=stepDrive(old,{},.05),again=stepDrive(s,{},.05);assert.deepEqual(s.collected,[0]);assert.deepEqual(again.collected,[0]);assert.deepEqual(old.collected,[]);});
+test('releasing throttle brakes, boost increases top speed',()=>{let normal=newDriveState(),boost=newDriveState();for(let i=0;i<50;i++){normal=stepDrive(normal,{throttle:1},.02);boost=stepDrive(boost,{throttle:1,boost:true},.02);}assert.ok(boost.speed>normal.speed);const before=normal.speed;for(let i=0;i<100;i++)normal=stepDrive(normal,{},.02);assert.ok(normal.speed<before*.01);});
+test('long frame stalls cannot teleport the robot',()=>{const s=stepDrive(newDriveState(),{throttle:1,boost:true},30);assert.ok(s.distance<.1);assert.equal(s.elapsed,.05);});
+test('demo steering collects all eight rings',()=>{let s=newDriveState();for(let i=0;i<12000&&s.collected.length<8;i++){const [x,z]=ringPositions.find((_,i)=>!s.collected.includes(i));const a=Math.atan2(x-s.x,z-s.z)-s.yaw,e=Math.atan2(Math.sin(a),Math.cos(a));s=stepDrive(s,{throttle:Math.abs(e)>1?.3:.8,steer:Math.max(-1,Math.min(1,e*1.4))},.033);}assert.equal(s.collected.length,8);});

@@ -35,3 +35,6 @@ The interactive viewer uses locally bundled Three.js physical materials, a gener
 Visual references consulted for lighting and choreography (no third-party footage copied):
 - https://voyager.so/blog/cad-model-to-product-animation
 - https://www.nodeconnector.com/case-studies/procedural-assembly
+
+## Interactive practice arena
+The new scene reuses the photo-referenced prototype mesh. Driving, ring pickup and the rectangular arena are deliberately simplified for an interactive website experience, and are not presented as the Hyperdrive field, scoring rules or tested physical robot capabilities. The user's supplied landing ZIP was inspected as a visual/interaction reference; its missing-asset reference bundles are not executed.

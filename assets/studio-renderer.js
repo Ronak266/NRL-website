@@ -1,3 +1,20 @@
+function makeRobotMeshes(group){
+ return parts.map(part=>{
+   const vertices=[],normals=[],adj=part.v.map(()=>[]);
+   const faces=part.f.map(face=>{
+    const a=new THREE.Vector3().fromArray(part.v[face[0]]),b=new THREE.Vector3().fromArray(part.v[face[1]]),c=new THREE.Vector3().fromArray(part.v[face[2]]);
+    const n=b.sub(a).cross(c.sub(a)).normalize();face.forEach(k=>adj[k].push(n));return {face,n};
+   });
+   for(const {face,n} of faces)for(let j=1;j<face.length-1;j++)for(const k of [face[0],face[j],face[j+1]]){
+    vertices.push(...part.v[k]);const normal=new THREE.Vector3();for(const neighbor of adj[k])if(neighbor.dot(n)>.75)normal.add(neighbor);normal.normalize();normals.push(normal.x,normal.y,normal.z);
+   }
+   const shape=new THREE.BufferGeometry();shape.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));shape.setAttribute('normal',new THREE.Float32BufferAttribute(normals,3));
+   const metal=part.material==='metal',glass=part.material==='glass',rubber=part.material==='rubber';
+   const material=new THREE.MeshPhysicalMaterial({color:glass?0xdcecf0:part.c,metalness:metal?.92:0,roughness:glass?.09:metal?.26:rubber?.88:.42,clearcoat:rubber?0:.12,clearcoatRoughness:.3,side:THREE.DoubleSide,transparent:glass,opacity:glass?.24:1,depthWrite:!glass,envMapIntensity:metal?1.3:.7});
+   const mesh=new THREE.Mesh(shape,material);mesh.castShadow=!glass;mesh.receiveShadow=true;mesh.position.fromArray(part.p);group.add(mesh);mesh.userData.part=part;return {mesh,part};
+  });
+}
+
 // Physically based studio renderer; the classic Canvas viewer remains the fallback.
 function mountStudio(host,fallback,{hero=false}={}){
  let renderer;
@@ -19,20 +36,7 @@ function mountStudio(host,fallback,{hero=false}={}){
   const key=new THREE.DirectionalLight(0xfff2e7,3.2);key.position.set(-3,7,5);key.castShadow=true;key.shadow.mapSize.set(2048,2048);Object.assign(key.shadow.camera,{left:-9,right:9,top:10,bottom:-8,far:35});key.shadow.bias=-.0003;key.shadow.normalBias=.025;key.shadow.radius=4;scene.add(key);
   const rim=new THREE.DirectionalLight(0xff2449,1.5);rim.position.set(4,3,-4);scene.add(rim);
   const robot=new THREE.Group();scene.add(robot);
-  const meshes=parts.map(part=>{
-   const vertices=[],normals=[],adj=part.v.map(()=>[]);
-   const faces=part.f.map(face=>{
-    const a=new THREE.Vector3().fromArray(part.v[face[0]]),b=new THREE.Vector3().fromArray(part.v[face[1]]),c=new THREE.Vector3().fromArray(part.v[face[2]]);
-    const n=b.sub(a).cross(c.sub(a)).normalize();face.forEach(k=>adj[k].push(n));return {face,n};
-   });
-   for(const {face,n} of faces)for(let j=1;j<face.length-1;j++)for(const k of [face[0],face[j],face[j+1]]){
-    vertices.push(...part.v[k]);const normal=new THREE.Vector3();for(const neighbor of adj[k])if(neighbor.dot(n)>.75)normal.add(neighbor);normal.normalize();normals.push(normal.x,normal.y,normal.z);
-   }
-   const shape=new THREE.BufferGeometry();shape.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));shape.setAttribute('normal',new THREE.Float32BufferAttribute(normals,3));
-   const metal=part.material==='metal',glass=part.material==='glass',rubber=part.material==='rubber';
-   const material=new THREE.MeshPhysicalMaterial({color:glass?0xdcecf0:part.c,metalness:metal?.92:0,roughness:glass?.09:metal?.26:rubber?.88:.42,clearcoat:rubber?0:.12,clearcoatRoughness:.3,side:THREE.DoubleSide,transparent:glass,opacity:glass?.24:1,depthWrite:!glass,envMapIntensity:metal?1.3:.7});
-   const mesh=new THREE.Mesh(shape,material);mesh.castShadow=!glass;mesh.receiveShadow=true;mesh.position.fromArray(part.p);robot.add(mesh);return {mesh,part};
-  });
+  const meshes=makeRobotMeshes(robot);
   const floor=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshStandardMaterial({color:0x17171b,metalness:.18,roughness:.62}));floor.rotation.x=-Math.PI/2;floor.position.y=-.7;floor.receiveShadow=true;scene.add(floor);
   const canvas=renderer.domElement;canvas.className='robot-canvas';canvas.setAttribute('role','img');canvas.setAttribute('aria-label','Studio-lit Hyperdrive robot. Drag to orbit.');
   host.append(canvas);fallback.style.display='none';host.classList.add('has-3d');
@@ -46,18 +50,42 @@ function mountStudio(host,fallback,{hero=false}={}){
   if(hero)document.querySelector('#hero-orbit').addEventListener('click',e=>{paused=!paused;e.currentTarget.textContent=paused?'RESUME ROTATION ▷':'PAUSE ROTATION Ⅱ';e.currentTarget.setAttribute('aria-pressed',String(paused));});
   new ResizeObserver(()=>{renderer.setSize(host.clientWidth,host.clientHeight,false);camera.aspect=host.clientWidth/Math.max(1,host.clientHeight);camera.updateProjectionMatrix();}).observe(host);
   new IntersectionObserver(e=>visible=e[0].isIntersecting,{rootMargin:'80px'}).observe(host);
-  let radius=4;
+  let radius=4,selected=null,preset=null,downX=0,downY=0;
+  const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
+  if(!hero){
+   canvas.addEventListener('pointerdown',e=>{downX=e.clientX;downY=e.clientY;preset=null;});
+   canvas.addEventListener('pointerup',e=>{
+    if(Math.hypot(e.clientX-downX,e.clientY-downY)>6)return;
+    const r=canvas.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);raycaster.setFromCamera(pointer,camera);
+    const hit=raycaster.intersectObjects(meshes.filter(x=>x.mesh.visible).map(x=>x.mesh),false)[0];
+    selected=hit?.object||null;const info=document.querySelector('#component-info');
+    info.textContent=selected?selected.userData.part.name+' / '+selected.userData.part.system:'Click any component to identify it';
+   });
+   document.querySelectorAll('[data-camera]').forEach(button=>button.addEventListener('click',()=>{
+    const poses={perspective:[.55,.55],front:[0,.18],top:[0,1.52],side:[Math.PI/2,.18]};preset=poses[button.dataset.camera];
+    document.querySelectorAll('[data-camera]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+   }));
+  }
+  // Physical orbital graphics and floating sparks give the hero spatial depth.
+  const orbitals=new THREE.Group();scene.add(orbitals);
+  if(hero){
+   for(let i=0;i<3;i++){const ring=new THREE.Mesh(new THREE.TorusGeometry(3+i*.22,.008,6,120),new THREE.MeshBasicMaterial({color:i===1?0xff647f:0xa51635,transparent:true,opacity:.35}));ring.rotation.set(Math.PI/2+i*.22,0,i*.3);ring.position.y=.8;orbitals.add(ring);}
+   const pos=[];for(let i=0;i<100;i++)pos.push(Math.sin(i*2.4)*(3+i%4),.2+(i%31)*.13,Math.cos(i*1.7)*(3+i%4));const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));orbitals.add(new THREE.Points(geo,new THREE.PointsMaterial({color:0xff4967,size:.025,transparent:true,opacity:.6})));
+  }
   renderer.setAnimationLoop(time=>{
    if(!visible||document.hidden||time-last<33)return;const dt=Math.min((time-last)/1000,.05);last=time;
    const frozen=document.body.classList.contains('paused')||reduced.matches;
+   if(preset){const amount=frozen?1:1-Math.exp(-dt*7);yaw+=(preset[0]-yaw)*amount;pitch+=(preset[1]-pitch)*amount;rotate.value=Math.round(yaw*180/Math.PI);}
+   if(hero&&!frozen&&!paused)orbitals.rotation.y+=dt*.05;
    if(hero&&!paused&&!drag&&!frozen)yaw+=dt*.10;
    const separation=hero?0:Number(host.dataset.separation||0),focus=hero?'all':host.dataset.system||'all',wire=!hero&&document.querySelector('#wire').getAttribute('aria-pressed')==='true';
-   for(const {mesh,part} of meshes){mesh.position.fromArray(offsetPart(part,separation));mesh.visible=focus==='all'||part.system===focus;mesh.material.wireframe=wire;}
+   for(const {mesh,part} of meshes){mesh.position.fromArray(offsetPart(part,separation));mesh.visible=focus==='all'||part.system===focus;mesh.material.wireframe=wire;mesh.material.emissive.setHex(mesh===selected?0x77142d:0x000000);const xray=!hero&&document.querySelector('#xray')?.getAttribute('aria-pressed')==='true';const glass=part.material==='glass';mesh.material.transparent=glass||xray;mesh.material.opacity=xray?(mesh===selected?1:.16):(glass?.24:1);mesh.material.depthWrite=!glass&&!xray;}
    if(separation!==lastSeparation||focus!==previousFocus){
     box.makeEmpty();for(const {mesh} of meshes)if(mesh.visible)box.expandByObject(mesh);box.getCenter(center);box.getSize(size);radius=size.length()*.52;previousFocus=focus;lastSeparation=separation;
    }
    target.lerp(center,frozen?1:1-Math.exp(-dt*8));
-   const distance=radius/Math.sin(Math.atan(Math.tan(camera.fov*Math.PI/360)*Math.min(1,camera.aspect)))*1.05;
+   const zoom=hero?1:Number(document.querySelector('#zoom')?.value||100)/100;
+   const distance=radius/Math.sin(Math.atan(Math.tan(camera.fov*Math.PI/360)*Math.min(1,camera.aspect)))*1.05/zoom;
    camera.position.set(target.x+Math.sin(yaw)*Math.cos(pitch)*distance,target.y+Math.sin(pitch)*distance,target.z+Math.cos(yaw)*Math.cos(pitch)*distance);camera.lookAt(target);
    renderer.render(scene,camera);host.dataset.renderedSeparation=separation.toFixed(3);
   });
