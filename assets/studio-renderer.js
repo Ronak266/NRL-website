@@ -37,7 +37,7 @@ function mountStudio(host,fallback,{hero=false}={}){
   const rim=new THREE.DirectionalLight(0xff2449,1.5);rim.position.set(4,3,-4);scene.add(rim);
   const robot=new THREE.Group();scene.add(robot);
   const meshes=makeRobotMeshes(robot);
-  const floor=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshStandardMaterial({color:0x17171b,metalness:.18,roughness:.62}));floor.rotation.x=-Math.PI/2;floor.position.y=-.7;floor.receiveShadow=true;scene.add(floor);
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshStandardMaterial({color:0x17171b,metalness:.18,roughness:.62}));floor.rotation.x=-Math.PI/2;floor.position.y=-.7;floor.receiveShadow=true;if(hero){floor.material.dispose();floor.material=new THREE.ShadowMaterial({opacity:.28});floor.position.y=-.08;}scene.add(floor);
   const canvas=renderer.domElement;canvas.className='robot-canvas';canvas.setAttribute('role','img');canvas.setAttribute('aria-label','Studio-lit Hyperdrive robot. Drag to orbit.');
   host.append(canvas);fallback.style.display='none';host.classList.add('has-3d');
   if(!hero)document.querySelector('#render-status').textContent='STUDIO 3D · REAL-TIME MATERIALS';
@@ -50,8 +50,9 @@ function mountStudio(host,fallback,{hero=false}={}){
   if(hero)document.querySelector('#hero-orbit').addEventListener('click',e=>{paused=!paused;e.currentTarget.textContent=paused?'RESUME ROTATION ▷':'PAUSE ROTATION Ⅱ';e.currentTarget.setAttribute('aria-pressed',String(paused));});
   new ResizeObserver(()=>{renderer.setSize(host.clientWidth,host.clientHeight,false);camera.aspect=host.clientWidth/Math.max(1,host.clientHeight);camera.updateProjectionMatrix();}).observe(host);
   new IntersectionObserver(e=>visible=e[0].isIntersecting,{rootMargin:'80px'}).observe(host);
-  let radius=4,selected=null,preset=null,downX=0,downY=0;
+  let radius=4,heroPointerX=0,heroPointerY=0,heroTiltX=0,heroTiltY=0,selected=null,preset=null,downX=0,downY=0;
   const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
+  if(hero){host.addEventListener('pointermove',e=>{const rect=host.getBoundingClientRect();heroPointerX=(e.clientX-rect.left)/rect.width-.5;heroPointerY=(e.clientY-rect.top)/rect.height-.5;});host.addEventListener('pointerleave',()=>{heroPointerX=0;heroPointerY=0;});}
   if(!hero){
    canvas.addEventListener('pointerdown',e=>{downX=e.clientX;downY=e.clientY;preset=null;});
    canvas.addEventListener('pointerup',e=>{
@@ -68,15 +69,18 @@ function mountStudio(host,fallback,{hero=false}={}){
   }
   // Physical orbital graphics and floating sparks give the hero spatial depth.
   const orbitals=new THREE.Group();scene.add(orbitals);
+  const pulseLight=new THREE.PointLight(0xff214b,hero?18:0,18,2);pulseLight.position.set(-2,2,3);scene.add(pulseLight);
+  let scan=null;
   if(hero){
-   for(let i=0;i<3;i++){const ring=new THREE.Mesh(new THREE.TorusGeometry(3+i*.22,.008,6,120),new THREE.MeshBasicMaterial({color:i===1?0xff647f:0xa51635,transparent:true,opacity:.35}));ring.rotation.set(Math.PI/2+i*.22,0,i*.3);ring.position.y=.8;orbitals.add(ring);}
+   for(let i=0;i<3;i++){const ring=new THREE.Mesh(new THREE.TorusGeometry(3+i*.22,.014,6,120),new THREE.MeshBasicMaterial({color:i===1?0xff647f:0xa51635,transparent:true,opacity:.35}));ring.rotation.set(Math.PI/2+i*.22,0,i*.3);ring.position.y=.8;orbitals.add(ring);}
+   const scanMaterial=new THREE.MeshBasicMaterial({color:0xff3154,transparent:true,opacity:.12,side:THREE.DoubleSide,depthWrite:false});scan=new THREE.Mesh(new THREE.PlaneGeometry(4.8,4.8),scanMaterial);scan.rotation.x=-Math.PI/2;scene.add(scan);
    const pos=[];for(let i=0;i<100;i++)pos.push(Math.sin(i*2.4)*(3+i%4),.2+(i%31)*.13,Math.cos(i*1.7)*(3+i%4));const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));orbitals.add(new THREE.Points(geo,new THREE.PointsMaterial({color:0xff4967,size:.025,transparent:true,opacity:.6})));
   }
   renderer.setAnimationLoop(time=>{
    if(!visible||document.hidden||time-last<33)return;const dt=Math.min((time-last)/1000,.05);last=time;
    const frozen=document.body.classList.contains('paused')||reduced.matches;
    if(preset){const amount=frozen?1:1-Math.exp(-dt*7);yaw+=(preset[0]-yaw)*amount;pitch+=(preset[1]-pitch)*amount;rotate.value=Math.round(yaw*180/Math.PI);}
-   if(hero&&!frozen&&!paused)orbitals.rotation.y+=dt*.05;
+   if(hero&&!frozen&&!paused){orbitals.rotation.y+=dt*.08;orbitals.rotation.z=Math.sin(time*.00025)*.10;pulseLight.intensity=18+Math.sin(time*.001)*7;scan.position.y=.35+(Math.sin(time*.00065)+1)*.7;heroTiltX+=(heroPointerX*.16-heroTiltX)*.06;heroTiltY+=(heroPointerY*.1-heroTiltY)*.06;}
    if(hero&&!paused&&!drag&&!frozen)yaw+=dt*.10;
    const separation=hero?0:Number(host.dataset.separation||0),focus=hero?'all':host.dataset.system||'all',wire=!hero&&document.querySelector('#wire').getAttribute('aria-pressed')==='true';
    for(const {mesh,part} of meshes){mesh.position.fromArray(offsetPart(part,separation));mesh.visible=focus==='all'||part.system===focus;mesh.material.wireframe=wire;mesh.material.emissive.setHex(mesh===selected?0x77142d:0x000000);const xray=!hero&&document.querySelector('#xray')?.getAttribute('aria-pressed')==='true';const glass=part.material==='glass';mesh.material.transparent=glass||xray;mesh.material.opacity=xray?(mesh===selected?1:.16):(glass?.24:1);mesh.material.depthWrite=!glass&&!xray;}
@@ -84,9 +88,9 @@ function mountStudio(host,fallback,{hero=false}={}){
     box.makeEmpty();for(const {mesh} of meshes)if(mesh.visible)box.expandByObject(mesh);box.getCenter(center);box.getSize(size);radius=size.length()*.52;previousFocus=focus;lastSeparation=separation;
    }
    target.lerp(center,frozen?1:1-Math.exp(-dt*8));
-   const zoom=hero?1:Number(document.querySelector('#zoom')?.value||100)/100;
+   const zoom=hero?(host.clientWidth>600?1.17:1.04):Number(document.querySelector('#zoom')?.value||100)/100;
    const distance=radius/Math.sin(Math.atan(Math.tan(camera.fov*Math.PI/360)*Math.min(1,camera.aspect)))*1.05/zoom;
-   camera.position.set(target.x+Math.sin(yaw)*Math.cos(pitch)*distance,target.y+Math.sin(pitch)*distance,target.z+Math.cos(yaw)*Math.cos(pitch)*distance);camera.lookAt(target);
+   const cameraYaw=yaw+(hero?heroTiltX:0),cameraPitch=pitch+(hero?heroTiltY:0);camera.position.set(target.x+Math.sin(cameraYaw)*Math.cos(cameraPitch)*distance,target.y+Math.sin(cameraPitch)*distance,target.z+Math.cos(cameraYaw)*Math.cos(cameraPitch)*distance);camera.lookAt(target);
    renderer.render(scene,camera);host.dataset.renderedSeparation=separation.toFixed(3);
   });
   canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();renderer.setAnimationLoop(null);canvas.remove();mountViewer(host,fallback,{hero,softwareOnly:true});});

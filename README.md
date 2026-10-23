@@ -60,3 +60,8 @@ The renderer produces 720p keyframes at 8 fps; FFmpeg interpolates the slow came
 The supplied `file-navigator-landing (1).zip` informed spatial interaction direction. Its reference bundles depend on missing application/model/media files; they are not loaded or copied into the website. The original upload is unchanged.
 
 Checks: `node --test scripts/geometry.test.mjs scripts/arena.test.mjs`.
+
+### Cinematic visual overhaul
+The canonical theme is `assets/cinematic.css`; the build script embeds it into both HTML entry points. The hero now uses a large transparent 3D scene, red studio lighting, an animated scanning plane, spatial orbitals, pointer-responsive camera movement and staggered title reveals. A pinned manifesto fills line by line as the visitor scrolls. Section entrances, directional button highlights, a single slanted marquee, profile hover depth and modal transitions complete the motion system.
+
+Animations respect reduced motion and the page pause control. Team intros and portraits remain explicit placeholders. The existing arena, engineering controls and video remain available.

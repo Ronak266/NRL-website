@@ -1,0 +1,28 @@
+// Cinematic motion follows the visitor. No scroll hijacking or hidden loading screen.
+const cinematicReduced=matchMedia('(prefers-reduced-motion: reduce)');
+const manifesto=document.querySelector('.manifesto'),manifestoLines=[...document.querySelectorAll('.manifesto-line')],heroSection=document.querySelector('.hero');
+let manifestoVisible=false,heroVisible=true,cinematicFrame=0;
+new IntersectionObserver(entries=>{for(const e of entries){if(e.target===manifesto)manifestoVisible=e.isIntersecting;if(e.target===heroSection)heroVisible=e.isIntersecting;}},{rootMargin:'80px'}).observe(manifesto);
+new IntersectionObserver(entries=>heroVisible=entries[0].isIntersecting,{rootMargin:'80px'}).observe(heroSection);
+function cinema(time){requestAnimationFrame(cinema);if(time-cinematicFrame<32||document.hidden)return;cinematicFrame=time;
+ const reduced=cinematicReduced.matches,paused=document.body.classList.contains('paused');
+ if(manifestoVisible&&!paused){const r=manifesto.getBoundingClientRect();const p=reduced?1:clamp((innerHeight*.6-r.top)/(r.height-innerHeight*.2));manifestoLines.forEach((line,i)=>line.style.setProperty('--fill',(clamp(p*3.8-i)*100)+'%'));}
+ if(heroVisible&&!paused){const p=reduced?0:clamp(-heroSection.getBoundingClientRect().top/innerHeight);heroSection.querySelector('.hero-copy').style.transform='translateY('+(-p*45)+'px)';heroSection.querySelector('.hero-stamp').style.transform='translateY('+(p*95)+'px) rotate(-10deg)';}
+}
+requestAnimationFrame(cinema);
+// Progressive text entrance adds hierarchy to section transitions.
+for(const heading of document.querySelectorAll('.section-head h2,.mission h2')){
+ heading.style.transition='transform 1.1s cubic-bezier(.16,1,.3,1),opacity 1.1s';
+ const io=new IntersectionObserver(entries=>{if(entries[0].isIntersecting){if(!cinematicReduced.matches&&!document.body.classList.contains('paused'))heading.animate([{transform:'translateY(35px)',opacity:0},{transform:'translateY(0)',opacity:1}],{duration:1000,easing:'cubic-bezier(.16,1,.3,1)',fill:'both'});io.disconnect();}},{threshold:.15});io.observe(heading);
+}
+// Small magnetic response gives buttons weight without moving their hit target.
+if(matchMedia('(pointer:fine)').matches){for(const button of document.querySelectorAll('.actions .btn,.end .btn')){
+ button.addEventListener('pointermove',e=>{if(cinematicReduced.matches||document.body.classList.contains('paused'))return;const r=button.getBoundingClientRect();button.style.translate=((e.clientX-r.left-r.width/2)*.09)+'px '+((e.clientY-r.top-r.height/2)*.12)+'px';});button.addEventListener('pointerleave',()=>button.style.translate='0 0');
+}}
+cinematicReduced.addEventListener('change',()=>{if(cinematicReduced.matches){manifestoLines.forEach(line=>line.style.setProperty('--fill','100%'));heroSection.querySelector('.hero-copy').style.transform='none';document.getAnimations().forEach(a=>{if(Number.isFinite(a.effect?.getComputedTiming().endTime))a.finish();else a.cancel();});}});
+new MutationObserver(()=>{
+ const paused=document.body.classList.contains('paused');
+ for(const animation of document.getAnimations())if(animation.effect?.target?.matches('.section-head h2,.mission h2')){
+  if(paused&&animation.playState==='running')animation.pause();else if(!paused&&animation.playState==='paused')animation.play();
+ }
+}).observe(document.body,{attributes:true,attributeFilter:['class']});
