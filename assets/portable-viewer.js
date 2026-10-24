@@ -54583,7 +54583,9 @@ document.addEventListener('keydown',event=>{
 // A compact chapter spine gives the long cinematic page a sense of place.
 const chapterLinks=[...document.querySelectorAll('.scene-rail a')];
 const chapters=chapterLinks.map(link=>({link,section:document.getElementById(link.dataset.scene)}));
-let chapterFrame=0;
+const chapterCue=document.createElement('div');chapterCue.className='chapter-cue mono';chapterCue.setAttribute('aria-hidden','true');
+chapterCue.innerHTML='<b></b><span></span>';document.body.append(chapterCue);
+let chapterFrame=0,currentScene=null,cueTimer=0;
 function updateChapter(){
  if(chapterFrame)return;
  chapterFrame=requestAnimationFrame(()=>{
@@ -54594,6 +54596,17 @@ function updateChapter(){
   for(const chapter of chapters){
    if(chapter===current)chapter.link.setAttribute('aria-current','location');
    else chapter.link.removeAttribute('aria-current');
+  }
+  if(current!==currentScene){
+   if(currentScene&&!cinematicReduced.matches&&!document.body.classList.contains('paused')){
+    chapterCue.querySelector('b').textContent=current.link.querySelector('b').textContent;
+    chapterCue.querySelector('span').textContent=current.link.querySelector('span').textContent;
+    chapterCue.classList.remove('is-visible');
+    void chapterCue.offsetWidth;
+    chapterCue.classList.add('is-visible');
+    clearTimeout(cueTimer);cueTimer=setTimeout(()=>chapterCue.classList.remove('is-visible'),1500);
+   }
+   currentScene=current;
   }
  });
 }
@@ -54613,7 +54626,7 @@ function watchEntrance(element,index=0){
 }
 for(const selector of ['.arena-shell','.sim-screen','.mentor-grid .portrait','.mentor-grid>div:last-child'])
  document.querySelectorAll(selector).forEach(watchEntrance);
-for(const selector of ['.sim-chapter','.gallery-tile','.mission-values>div'])
+for(const selector of ['.sim-chapter','.gallery-tile','.mission-values>div','.module-tile'])
  document.querySelectorAll(selector).forEach((element,index)=>watchEntrance(element,index));
 const cardContainer=document.querySelector('#cards');
 function watchCards(){[...cardContainer.children].forEach((element,index)=>watchEntrance(element,index));}
@@ -54621,7 +54634,7 @@ watchCards();
 new MutationObserver(watchCards).observe(cardContainer,{childList:true});
 
 // Red ink travels down each scene as it crosses the viewing area.
-const inkScenes=[...document.querySelectorAll('#arena,#simulations,#team,#journey,#gallery')];
+const inkScenes=[...document.querySelectorAll('#modules,#arena,#simulations,#team,#journey,#gallery')];
 for(const scene of inkScenes){const ink=document.createElement('i');ink.className='scene-ink';ink.setAttribute('aria-hidden','true');scene.append(ink);}
 const sceneVisibility=new IntersectionObserver(entries=>{
  for(const entry of entries)entry.target.dataset.scrollVisible=entry.isIntersecting?'true':'false';
@@ -54646,7 +54659,7 @@ updateSceneInk();
 
 // Pointer lighting follows the surface, leaving text and hit targets still.
 if(matchMedia('(pointer:fine)').matches){
- for(const surface of document.querySelectorAll('.card,.gallery-tile,.sim-screen')){
+ for(const surface of document.querySelectorAll('.card,.gallery-tile,.sim-screen,.module-tile')){
   surface.classList.add('light-surface');
   surface.addEventListener('pointermove',event=>{
    if(cinematicReduced.matches||document.body.classList.contains('paused'))return;
@@ -54656,6 +54669,14 @@ if(matchMedia('(pointer:fine)').matches){
   });
  }
 }
+
+// Module panels are real shortcuts into the matching subassembly.
+for(const tile of document.querySelectorAll('.module-tile'))tile.addEventListener('click',()=>{
+ const tab=document.querySelector('.system-tabs button[data-system="'+tile.dataset.systemJump+'"]');
+ tab.click();
+ document.querySelector('#assembly').scrollIntoView({behavior:cinematicReduced.matches||document.body.classList.contains('paused')?'auto':'smooth',block:'start'});
+ tab.focus({preventScroll:true});
+});
 
 // The reticle tracks an intentional robot interaction without changing its drag controls.
 if(matchMedia('(pointer:fine)').matches){
