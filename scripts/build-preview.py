@@ -15,6 +15,7 @@ html=(ROOT/'index.html').read_text()
 html=re.sub(r'<style>.*?</style>',lambda m:'<style>'+(ROOT/'assets/cinematic.css').read_text()+'</style>',html,flags=re.S)
 (ROOT/'index.html').write_text(html)
 html=html.replace('<script src="assets/portable-viewer.js"></script>','<script>'+bundle.replace('</script','<\\/script')+'</script>')
+html=html.replace('<script src="assets/boot-runtime.js"></script>','<script>'+(ROOT/'assets/boot-runtime.js').read_text()+'</script>')
 def embed(m):
  attr,path=m.group(1),m.group(2);suffix=Path(path).suffix
  mime={'.svg':'image/svg+xml','.jpg':'image/jpeg','.mp4':'video/mp4'}.get(suffix)

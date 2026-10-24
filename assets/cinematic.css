@@ -133,3 +133,50 @@ header nav a:hover{color:#fff}
 body.paused .scroll-entrance,body.paused .sim-chapter.scroll-entrance{opacity:1;transform:none;clip-path:var(--final-clip,inset(0));transition:none}
 body.paused .scene-ink{display:none}
 body.paused .lab-stage:after{display:none}
+
+/* First contact: a short, skippable boot sequence over the existing site. */
+html.booting{overflow:hidden}
+.boot-veil{position:fixed;inset:0;z-index:1001;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at 50% 42%,#3b0819 0,#0c060a 40%,#030304 90%);opacity:0;visibility:hidden;transition:opacity .6s var(--ease),visibility .6s;isolation:isolate}
+html.booting .boot-veil{opacity:1;visibility:visible}
+.boot-veil:before{content:'';position:absolute;inset:-35%;background:repeating-linear-gradient(120deg,transparent 0 33px,#e9193e18 34px 35px,transparent 36px 112px);transform:rotate(-5deg);animation:boot-speed 7s linear infinite;pointer-events:none}
+.boot-veil:after{content:'187';position:absolute;right:-4%;bottom:-18%;font:italic 700 min(54vw,720px)/1 'Barlow Condensed';-webkit-text-stroke:1px #ff38534d;color:transparent;pointer-events:none}
+.boot-grid{position:absolute;inset:5%;border:1px solid #fa315035;clip-path:polygon(7% 0,100% 0,100% 88%,93% 100%,0 100%,0 12%);background:radial-gradient(circle,#ed29401c .7px,transparent 1px) 0 0/12px 12px;opacity:.55;pointer-events:none}
+.boot-center{position:relative;z-index:2;width:min(750px,calc(100% - 50px));display:flex;flex-direction:column;align-items:center;text-align:center}
+.boot-mark{width:100px;height:100px;border:1px solid #ff42617c;transform:rotate(45deg);display:grid;place-items:center;box-shadow:inset 0 0 35px #fa20452a,0 0 60px #fa20451a;position:relative;animation:boot-mark 3s ease-in-out infinite}
+.boot-mark:before,.boot-mark:after{content:'';position:absolute;background:#fb2b4e}.boot-mark:before{width:122px;height:2px}.boot-mark:after{height:122px;width:2px}
+.boot-mark span{font:italic 700 44px 'Barlow Condensed';transform:rotate(-45deg);color:#fff;text-shadow:0 0 20px #ff244b}
+.boot-kicker{color:#ff9bb0;font-size:9px;letter-spacing:.29em;margin:35px 0 22px}
+.boot-center h2{font-size:clamp(66px,11vw,150px);font-style:italic;line-height:.75;letter-spacing:-.04em;text-shadow:5px 7px 0 #6c0921}
+.boot-center h2 em{color:#ff244a}
+#boot-status{font-size:10px;color:#ffc9d3;letter-spacing:.2em;margin:38px 0 17px;min-height:1.5em}
+.boot-track{width:min(350px,75vw);display:flex;gap:6px}.boot-track span{height:4px;flex:1;transform:scaleX(0);transform-origin:left;background:#ff294b;box-shadow:0 0 14px #ff294b;transition:transform .45s var(--ease)}
+.boot-veil[data-stage="0"] .boot-track span:nth-child(1),.boot-veil[data-stage="1"] .boot-track span:nth-child(-n+2),.boot-veil[data-stage="2"] .boot-track span,.boot-veil[data-stage="3"] .boot-track span{transform:scaleX(1)}
+.boot-skip{margin-top:34px;background:transparent;color:#ffd3dc;border:1px solid #ff597280;font:700 9px ui-monospace,monospace;letter-spacing:.16em;padding:13px 22px;transition:background .25s,color .25s,transform .25s}
+.boot-skip:hover{background:#f4183e;color:#fff;transform:translateY(-3px)}
+.boot-corner{position:absolute;left:5%;bottom:6%;z-index:2;color:#a9667c;font-size:8px;line-height:1.8}
+@keyframes boot-speed{to{transform:translate3d(-180px,130px,0) rotate(-5deg)}}
+@keyframes boot-mark{50%{box-shadow:inset 0 0 45px #fa204550,0 0 85px #fa204547}}
+
+/* Visible feedback for the robot, chapter entrances and active scene. */
+.hero-reticle{position:absolute;left:0;top:0;z-index:8;display:flex;align-items:center;gap:13px;opacity:0;pointer-events:none;color:#ffced7;font-size:8px;text-shadow:0 2px 8px #000;transition:opacity .25s}
+.hero-reticle.is-visible{opacity:1}.hero-reticle i{width:48px;height:48px;border:1px solid #ff3a5b;display:block;border-radius:50%;position:relative;box-shadow:0 0 22px #ff315459,inset 0 0 20px #ff31542b;transform:translate(-50%,-50%);animation:reticle-spin 8s linear infinite}
+.hero-reticle i:after{content:'+';position:absolute;inset:0;display:grid;place-items:center;font:19px ui-monospace,monospace;color:#fff}
+.hero-reticle span{transform:translate(-24px,-24px);white-space:nowrap;background:#16070eba;padding:6px 8px;border-left:2px solid #f4183e}
+.hero-reticle.is-dragging i{border-color:#fff;box-shadow:0 0 35px #ff3154;scale:1.2}
+@keyframes reticle-spin{to{rotate:360deg}}
+.section-head{position:relative}.section-head:before{content:'';position:absolute;top:35%;left:-35px;width:min(55vw,740px);height:2px;background:linear-gradient(90deg,#ff2c50,transparent);pointer-events:none;opacity:0;transform:translateX(-50px) rotate(-10deg) scaleX(.2);transform-origin:left}
+.section-head.visible:before{animation:scene-slash 1.25s .1s var(--ease) both}
+@keyframes scene-slash{35%{opacity:.75;transform:translateX(10px) rotate(-10deg) scaleX(1)}100%{opacity:.18;transform:translateX(35px) rotate(-10deg) scaleX(1.1)}}
+.assembly .stage-title{letter-spacing:.2em;text-shadow:0 0 18px #ff294b}
+.arena-hud{border-left:3px solid #ff244a;box-shadow:inset 0 0 30px #f4183e12,0 8px 35px #0008}
+.arena-hud:before{content:'';position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,#ff546d,transparent);animation:hud-sweep 5s ease-in-out infinite;pointer-events:none}
+@keyframes hud-sweep{0%,100%{opacity:.25;transform:translateX(-18%)}50%{opacity:.9;transform:translateX(18%)}}
+.sim-screen{position:relative}.sim-screen:after{content:'';position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,#ff3b5d,transparent);background-size:35% 100%;background-repeat:no-repeat;animation:screen-scan 6s linear infinite;pointer-events:none}
+@keyframes screen-scan{to{background-position:150% 0}}
+.mission-values b{text-shadow:0 0 24px #f4183e80;font-variant-numeric:tabular-nums}
+.arena-section:before{transform:translateY(calc(var(--scene-progress,0) * -90px)) rotate(-4deg)}
+.team .dir-side:before{translate:calc(var(--scene-progress,0) * 45px) 0}
+.gallery-tile:before{translate:0 calc(var(--scene-progress,0) * -24px)}
+@media(max-width:760px){.boot-mark{width:74px;height:74px}.boot-mark:before{width:95px}.boot-mark:after{height:95px}.boot-mark span{font-size:34px}.boot-center h2{font-size:clamp(59px,15vw,95px)}.boot-kicker{font-size:7px}.boot-corner{font-size:7px}.hero-reticle{display:none}.section-head:before{left:-10px;width:85vw}}
+@media(prefers-reduced-motion:reduce){.boot-veil:before,.boot-mark,.hero-reticle i,.arena-hud:before,.sim-screen:after{animation:none!important}.section-head.visible:before{animation:none;opacity:0}.arena-section:before{transform:none}.team .dir-side:before,.gallery-tile:before{translate:none}}
+body.paused .section-head.visible:before{animation:none;opacity:0}

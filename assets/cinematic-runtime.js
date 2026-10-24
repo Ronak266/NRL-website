@@ -140,3 +140,47 @@ if(matchMedia('(pointer:fine)').matches){
   });
  }
 }
+
+// The reticle tracks an intentional robot interaction without changing its drag controls.
+if(matchMedia('(pointer:fine)').matches){
+ const art=document.querySelector('.hero-art'),reticle=art.querySelector('.hero-reticle');
+ let reticleFrame=0,pointerX=0,pointerY=0;
+ art.addEventListener('pointermove',event=>{
+  if(cinematicReduced.matches||document.body.classList.contains('paused'))return;
+  const r=art.getBoundingClientRect();pointerX=event.clientX-r.left;pointerY=event.clientY-r.top;
+  if(reticleFrame)return;
+  reticleFrame=requestAnimationFrame(()=>{
+   reticleFrame=0;reticle.style.translate=pointerX+'px '+pointerY+'px';
+   reticle.classList.add('is-visible');
+  });
+ });
+ art.addEventListener('pointerleave',()=>reticle.classList.remove('is-visible','is-dragging'));
+ art.addEventListener('pointerdown',event=>{
+  if(event.target.closest('button'))return;
+  reticle.classList.add('is-dragging');reticle.querySelector('span').textContent='ROTATING 187';
+ });
+ for(const name of ['pointerup','pointercancel'])art.addEventListener(name,()=>{
+  reticle.classList.remove('is-dragging');reticle.querySelector('span').textContent='DRAG TO ORBIT';
+ });
+}
+
+// Team stats count only when visitors reach the mission, then keep their final value.
+const stats=[...document.querySelectorAll('.mission-values b')].filter(element=>/^\d+$/.test(element.textContent.trim()));
+const statObserver=new IntersectionObserver(entries=>{
+ if(!entries[0].isIntersecting)return;
+ statObserver.disconnect();
+ if(cinematicReduced.matches||document.body.classList.contains('paused'))return;
+ const start=performance.now();
+ function count(now){
+  const fraction=Math.min(1,(now-start)/1100),eased=1-Math.pow(1-fraction,3);
+  for(const element of stats){
+   const final=Number(element.dataset.finalCount);
+   element.textContent=String(Math.round(final*eased)).padStart(element.dataset.finalCount.length,'0');
+  }
+  if(fraction<1&&!document.body.classList.contains('paused'))requestAnimationFrame(count);
+  else for(const element of stats)element.textContent=element.dataset.finalCount;
+ }
+ requestAnimationFrame(count);
+},{threshold:.45});
+for(const element of stats)element.dataset.finalCount=element.textContent.trim();
+statObserver.observe(document.querySelector('.mission-values'));
