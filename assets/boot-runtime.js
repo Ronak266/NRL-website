@@ -17,11 +17,12 @@
  }
  function check(){
   if(!document.documentElement.classList.contains('booting')){finish();return;}
-  if(document.readyState!=='loading')setStage(1,'ASSEMBLING THE INTERFACE');
-  if(document.readyState==='complete')setStage(2,'CALIBRATING THE MACHINE');
-  if(document.querySelector('.hero-art.has-3d')){
+  const elapsed=performance.now()-start;
+  if(elapsed>=220&&document.readyState!=='loading')setStage(1,'ASSEMBLING THE INTERFACE');
+  if(elapsed>=520&&document.readyState==='complete')setStage(2,'CALIBRATING THE MACHINE');
+  if(elapsed>=850&&document.querySelector('.hero-art.has-3d')){
    setStage(3,'MACHINE ONLINE');
-   if(performance.now()-start>900)finish();
+   if(elapsed>=1250)finish();
   }
  }
  skip.addEventListener('click',finish);

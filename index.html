@@ -221,7 +221,76 @@ body.paused .chapter-cue{display:none}
 .module-tile.scroll-entrance.is-inview{clip-path:var(--final-clip)}
 body.paused .module-art svg path,body.paused .module-art svg circle,body.paused .module-art svg rect{stroke-dashoffset:0;transition:none}
 @media(prefers-reduced-motion:reduce){.module-tile.scroll-entrance,.module-tile.scroll-entrance.is-inview{clip-path:var(--final-clip)}}
-</style><script>document.documentElement.classList.add("booting");setTimeout(()=>document.documentElement.classList.remove("booting"),5000)</script></head><body><div class="boot-veil" id="boot-screen" role="group" aria-label="Titan Forge initialization"><div class="boot-grid" aria-hidden="true"></div><div class="boot-center"><div class="boot-mark" aria-hidden="true"><span>TF</span></div><div class="boot-kicker mono">TITAN FORGE // SYSTEM 187</div><h2>INITIALIZING<br><em>THE FORGE.</em></h2><p id="boot-status" class="mono" role="status" aria-live="polite">POWERING THE FORGE</p><div class="boot-track" aria-hidden="true"><span></span><span></span><span></span></div><button id="boot-skip" class="boot-skip" type="button">SKIP INTRO ↗</button></div><div class="boot-corner mono" aria-hidden="true">NRL / HYPERDRIVE<br>PROTOTYPE 187</div></div><script src="assets/boot-runtime.js"></script><div id="reading-progress" aria-hidden="true"></div>
+
+/* Comic-book opening: ink, crimson, paper, and the actual Hyperdrive silhouette. */
+.boot-veil{background:linear-gradient(112deg,#080608 0 46%,#f2ece4 46% 67%,#d7193e 67% 69%,#080608 69%);clip-path:polygon(0 0,100% 0,100% 0,0 0);transition:clip-path .65s var(--ease),opacity .5s,visibility .65s}
+html.booting .boot-veil{clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}
+.boot-veil:before{opacity:.5;mix-blend-mode:screen}
+.boot-veil:after{right:-2%;bottom:-10%;font-size:min(45vw,650px);color:#ffffff0b;-webkit-text-stroke:1px #ff2c5145}
+.boot-grid{inset:3%;border-color:#ee315262;clip-path:polygon(4% 0,100% 0,100% 92%,96% 100%,0 100%,0 8%)}
+.boot-center{width:min(1250px,calc(100% - 10vw));display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);align-items:center;gap:5%;text-align:left}
+.boot-left{position:relative;z-index:3;min-width:0;animation:boot-copy 1s var(--ease) both}
+.boot-mark{width:70px;height:70px;margin-left:15px;box-shadow:inset 0 0 30px #f4183e30,0 0 30px #f4183e38}
+.boot-mark:before{width:90px}.boot-mark:after{height:90px}.boot-mark span{font-size:34px}
+.boot-kicker{margin:40px 0 20px;color:#f3a8b9}
+.boot-center h2{font-size:clamp(82px,9vw,155px);line-height:.78;white-space:nowrap;color:#f9f0ed;text-shadow:5px 7px 0 #8d0c27,10px 12px 0 #000}
+.boot-center h2 em{color:#ff2149;-webkit-text-stroke:1px #ffabc0}
+#boot-status{color:#ffcdd6;margin:44px 0 18px}
+.boot-track{width:min(410px,80%);gap:8px}.boot-track span{height:6px;transform:skew(-24deg) scaleX(0)}
+.boot-veil[data-stage="0"] .boot-track span:nth-child(1),.boot-veil[data-stage="1"] .boot-track span:nth-child(-n+2),.boot-veil[data-stage="2"] .boot-track span,.boot-veil[data-stage="3"] .boot-track span{transform:skew(-24deg) scaleX(1)}
+.boot-bottom{display:flex;align-items:center;gap:22px;margin-top:22px;flex-wrap:wrap}.boot-bottom .mono{color:#a87787;font-size:8px}.boot-skip{margin:0;background:#f1eae2;border:2px solid #190b11;color:#190b11;box-shadow:5px 5px 0 #dd1940;font-weight:700}
+.boot-skip:hover{background:#f4183e;color:white;transform:translate(-2px,-2px);box-shadow:7px 7px 0 #f1eae2}
+.boot-figure{position:relative;width:100%;height:min(64vh,580px);margin:0;background:radial-gradient(circle,#d1c3bc 1px,transparent 1.5px) 0 0/10px 10px,#f2ece4;border:7px solid #16090e;box-shadow:16px 16px 0 #e51a40,22px 22px 0 #070506;clip-path:polygon(0 0,100% 0,100% 86%,87% 100%,0 100%);overflow:hidden;animation:boot-page .95s .12s var(--ease) both}
+.boot-figure:before{content:'187';position:absolute;top:3%;right:-4%;font:italic 700 min(26vw,320px)/.8 'Barlow Condensed';-webkit-text-stroke:2px #120b10;color:transparent;opacity:.22}
+.boot-figure:after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(145deg,transparent 33%,#f4183e1e 33.5% 34.5%,transparent 35% 72%,#12080b20 72.5% 73%,transparent 73.5%)}
+.boot-figure img{position:absolute;inset:12% 4% 11%;height:77%;width:92%;object-fit:contain;filter:drop-shadow(0 35px 20px #1b0d1680);animation:boot-robot 2.2s ease-in-out infinite alternate}
+.boot-print{position:absolute;top:20px;left:22px;z-index:2;color:#431525;font-weight:700;font-size:9px;line-height:1.5}
+.boot-figure figcaption{position:absolute;bottom:25px;left:22px;z-index:2;color:#431525;font-size:8px;line-height:1.6;font-weight:700;background:#f2ece4c9;padding:6px 8px;border-left:3px solid #e41941}
+.boot-corner{color:#f7b7c7}
+@keyframes boot-copy{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:none}}
+@keyframes boot-page{from{opacity:0;transform:translate(60px,30px) rotate(5deg)}to{opacity:1;transform:none}}
+@keyframes boot-robot{to{transform:translateY(-8px) scale(1.015)}}
+
+/* Alternating white paper chapters give the dark machinery real contrast. */
+.arena-section{color:#1a0d11;background:radial-gradient(circle,#2222220f .7px,transparent 1px) 0 0/9px 9px,linear-gradient(135deg,#f5f0e8,#ece3db 62%,#f6f1e9);border-block:8px solid #13090d}
+.arena-section:before{color:#ffffff00;-webkit-text-stroke:2px #13090d1b}
+.arena-section .section-head h2{color:#13090d;text-shadow:4px 5px 0 #c9b8b8}
+.arena-section .section-head h2 em{color:#c90935}
+.arena-section .section-head .mono{color:#9b092c}
+.arena-section .section-head p{color:#402c32;font-weight:600}
+.arena-section .arena-shell{border:4px solid #180a10;box-shadow:12px 12px 0 #bb1033,0 40px 100px #0005;background:#111014;color:#f8f2ed}
+.arena-section .arena-note{color:#604b53}
+.arena-section .section-head h2:after{background:#c90935}
+.team.wrap{background:radial-gradient(circle,#160a1115 .7px,transparent 1px) 0 0/10px 10px,linear-gradient(120deg,#f5efe6,#ebe0d8);color:#190c12;padding:105px 42px;border:5px solid #17090f;box-shadow:15px 15px 0 #c41337;position:relative}
+.team.wrap:after{content:'';position:absolute;top:0;right:0;width:75px;height:75px;background:linear-gradient(45deg,#c41337 0 50%,#12090e 50%);clip-path:polygon(100% 0,100% 100%,0 0);pointer-events:none}
+.team .section-head h2{color:#160a0f;text-shadow:4px 5px 0 #c7b7b5}
+.team .section-head p{color:#402c33;font-weight:600}
+.team .section-head .mono{color:#9f0b30}
+.team .dir-side>.mono,.team .dir-bar{color:#63474f}
+.team .dir-bar{border-bottom:2px solid #190b1240}
+.team .folder{color:#38242c;border-left:3px solid #190a1166;font-weight:700}
+.team .folder.active{background:#c60d36;color:#fff;border-color:#18080e;box-shadow:5px 4px 0 #17070e}
+.team .card{background:#fff8ef;color:#190c12;border:3px solid #170b10;box-shadow:7px 7px 0 #be1036}
+.team .card:hover{border-color:#bc0b31;box-shadow:11px 12px 0 #17080e}
+.team .portrait{background:radial-gradient(circle,#39101e20 1px,transparent 1.5px) 0 0/8px 8px,linear-gradient(145deg,#ede1d8,#d4c1bb)}
+.team .portrait svg{color:#27101a;opacity:.48}
+.team .portrait:after{color:#872038;font-weight:700}
+.team .card-info{background:#fff8ef;border-top:3px solid #1a0b11}
+.team .card h3{color:#180a0e}
+.team .card-foot{color:#694955}
+.team .card-foot b{color:#aa0c32}
+.mission{color:#160a0f;background:radial-gradient(circle,#290c1718 .8px,transparent 1.3px) 0 0/10px 10px,linear-gradient(118deg,#f6f1e9,#e9ddd5);border-block:7px solid #160a10}
+.mission:before{opacity:.15;background:repeating-linear-gradient(128deg,transparent 0 18px,#a7092a80 19px 20px,transparent 21px 55px)}
+.mission h2{color:#160a0f;text-shadow:4px 5px 0 #cfbcbc}
+.mission h2 em{color:#b90b33}
+.mission p{color:#3e2b32;font-weight:600}
+.mission .mono,.mission-values .mono{color:#7b1730}
+.mission-values b{color:#b40732;text-shadow:3px 4px 0 #d5b7bd}
+@media(max-width:1100px){.boot-center{width:calc(100% - 9vw);grid-template-columns:1.15fr .85fr;gap:2%}.boot-center h2{font-size:10vw}.boot-figure{height:55vh}.boot-figure img{inset:16% 2% 10%;height:74%;width:96%}}
+@media(max-width:760px){.boot-veil{background:linear-gradient(120deg,#080608 0 64%,#f2ece4 64% 82%,#d7193e 82% 84%,#080608 84%)}.boot-center{width:calc(100% - 54px);display:block}.boot-left{z-index:3}.boot-center h2{font-size:clamp(65px,15vw,105px)}.boot-kicker{font-size:7px;margin:30px 0 18px}.boot-mark{width:58px;height:58px}.boot-mark:before{width:77px}.boot-mark:after{height:77px}.boot-mark span{font-size:28px}#boot-status{margin:24px 0 13px;font-size:8px}.boot-track{width:min(340px,80%)}.boot-bottom{gap:10px}.boot-bottom .mono{display:none}.boot-figure{position:absolute;right:-23%;bottom:-34%;width:75%;height:50vh;opacity:.55;box-shadow:8px 8px 0 #e51a40}.boot-figure img{inset:15% 0 9%;width:100%;height:76%}.boot-figure figcaption,.boot-print{display:none}.boot-corner{bottom:3%;left:5%}.team.wrap{width:calc(100% - 24px);padding:65px 15px;border-width:3px;box-shadow:6px 7px 0 #c41337}.team .directory{margin-top:35px}.team .card{border-width:2px;box-shadow:4px 4px 0 #be1036}.arena-section .arena-shell{box-shadow:5px 6px 0 #bb1033}}
+@media(max-width:390px){.boot-figure{right:-29%;bottom:-28%;opacity:.34}.boot-center h2{font-size:17vw}.team.wrap{padding-inline:11px}}
+@media(prefers-reduced-motion:reduce){.boot-left,.boot-figure,.boot-figure img{animation:none}.boot-veil{transition:none}}
+</style><script>document.documentElement.classList.add("booting");setTimeout(()=>document.documentElement.classList.remove("booting"),5000)</script></head><body><div class="boot-veil" id="boot-screen" role="group" aria-label="Titan Forge initialization"><div class="boot-grid" aria-hidden="true"></div><div class="boot-center"><div class="boot-left"><div class="boot-mark" aria-hidden="true"><span>TF</span></div><div class="boot-kicker mono">TITAN FORGE // SYSTEM 187</div><h2>INITIALIZING<br><em>THE FORGE.</em></h2><p id="boot-status" class="mono" role="status" aria-live="polite">POWERING THE FORGE</p><div class="boot-track" aria-hidden="true"><span></span><span></span><span></span></div><div class="boot-bottom"><button id="boot-skip" class="boot-skip" type="button">SKIP INTRO ↗</button><span class="mono">HYPERDRIVE / NRL 2026</span></div></div><figure class="boot-figure" aria-hidden="true"><span class="boot-print mono">FIELD UNIT / 187<br>PROTOTYPE VIEW</span><img src="assets/hyperdrive-robot.svg" alt=""><figcaption class="mono">FOUR WHEELS · ONE MACHINE<br>REAL BUILD / PHOTO-REFERENCED</figcaption></figure></div><div class="boot-corner mono" aria-hidden="true">NRL / HYPERDRIVE<br>PROTOTYPE 187</div></div><script src="assets/boot-runtime.js"></script><div id="reading-progress" aria-hidden="true"></div>
 <header><div class="wrap"><a class="brand" href="#home" aria-label="Titan Forge home"><span class="mark"></span>TITAN FORGE</a><nav aria-label="Main navigation"><a href="#arena">Play game</a><a href="#assembly">The machine</a><a href="#team">The team</a><a href="#simulations">Simulations</a></nav><span class="status mono"><i class="dot"></i> NATIONAL ROBOTICS LEAGUE</span></div></header>
 <main><nav class="scene-rail" aria-label="Page chapters"><a href="#home" data-scene="home" aria-label="Chapter 0: Home"><b>00</b><span>ARRIVAL</span></a><a href="#arena" data-scene="arena" aria-label="Chapter 1: Pilot mode"><b>01</b><span>PILOT MODE</span></a><a href="#assembly" data-scene="assembly" aria-label="Chapter 2: The machine"><b>02</b><span>THE MACHINE</span></a><a href="#modules" data-scene="modules" aria-label="Chapter 3: Robot systems"><b>03</b><span>ROBOT SYSTEMS</span></a><a href="#simulations" data-scene="simulations" aria-label="Chapter 4: Motion study"><b>04</b><span>MOTION STUDY</span></a><a href="#team" data-scene="team" aria-label="Chapter 5: The squad"><b>05</b><span>THE SQUAD</span></a></nav><section class="hero" id="home"><canvas id="sparks" aria-hidden="true"></canvas><div class="wrap"><div class="hero-stamp" aria-hidden="true">187</div><div class="hero-sigil" aria-hidden="true"><span>TF</span><small>HYPERDRIVE<br>UNIT 187</small></div><div class="hero-grid"><div class="hero-copy"><div class="eyebrow mono"><span class="eyebrow-rule" aria-hidden="true"></span> NATIONAL ROBOTICS LEAGUE // HYPERDRIVE</div><h1 aria-label="Built different."><span class="hero-line"><span>BUILT</span></span><span class="hero-line"><span>DIFFERENT.</span></span></h1><p class="intro">Six builders. One relentless machine. Step inside Titan Forge.</p><div class="actions"><a class="btn primary" href="#arena">PLAY THE GAME <span>↗</span></a><a class="btn" href="#assembly">EXPLORE IN 3D <span>↗</span></a></div></div><div class="hero-art"><div class="halo"></div><div class="cross"></div><div class="art-label mono"><span class="live-label">LIVE 3D</span> &nbsp; DRAG TO EXPLORE</div><div class="hero-reticle mono" aria-hidden="true"><i></i><span>DRAG TO ORBIT</span></div><div class="robot-callout mono" aria-hidden="true"><strong>PROJECT 187</strong><span>HYPERDRIVE / PROTOTYPE</span></div><img class="hero-robot" src="assets/hyperdrive-robot.svg" alt="Titan Forge Hyperdrive prototype: four rubber traction wheels, transparent chassis, exposed controller and a front mechanism holding a yellow CORE" width="600" height="540"><div class="hero-view-controls"><button class="btn ignition" id="hero-ignite" aria-pressed="false">IGNITE THE FORGE ↗</button><button class="btn" id="hero-orbit" aria-pressed="false">PAUSE ROTATION Ⅱ</button><span class="mono">PHOTO-REFERENCED PROTOTYPE</span></div></div></div><div class="hero-bottom mono"><span>06 BUILDERS &nbsp; / &nbsp; 01 MENTOR</span><span class="hide-mobile">BUILD WITH CURIOSITY. COMPETE WITH PURPOSE.</span><span>SCROLL TO TAKE IT APART ↓</span></div></div></section>
 <div class="ticker" aria-hidden="true"><div>ENGINEER THE UNEXPECTED <b>✳</b> SIX MINDS. ONE MACHINE. <b>✳</b> TITAN FORGE <b>✳</b> BUILD. BREAK. REBUILD. <b>✳</b> ENGINEER THE UNEXPECTED <b>✳</b> SIX MINDS. ONE MACHINE. <b>✳</b> TITAN FORGE <b>✳</b> BUILD. BREAK. REBUILD. <b>✳</b></div></div>
