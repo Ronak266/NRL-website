@@ -54624,7 +54624,7 @@ function watchEntrance(element,index=0){
  element.classList.add('scroll-entrance');
  entranceObserver.observe(element);
 }
-for(const selector of ['.arena-shell','.sim-screen','.mentor-grid .portrait','.mentor-grid>div:last-child'])
+for(const selector of ['.sim-screen','.mentor-grid .portrait','.mentor-grid>div:last-child'])
  document.querySelectorAll(selector).forEach(watchEntrance);
 for(const selector of ['.sim-chapter','.gallery-tile','.mission-values>div','.module-tile'])
  document.querySelectorAll(selector).forEach((element,index)=>watchEntrance(element,index));
