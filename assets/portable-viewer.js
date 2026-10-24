@@ -54523,7 +54523,7 @@ new IntersectionObserver(entries=>heroVisible=entries[0].isIntersecting,{rootMar
 function cinema(time){requestAnimationFrame(cinema);if(time-cinematicFrame<32||document.hidden)return;cinematicFrame=time;
  const reduced=cinematicReduced.matches,paused=document.body.classList.contains('paused');
  if(manifestoVisible&&!paused){const r=manifesto.getBoundingClientRect();const p=reduced?1:clamp((innerHeight*.6-r.top)/(r.height-innerHeight*.2));manifestoLines.forEach((line,i)=>line.style.setProperty('--fill',(clamp(p*3.8-i)*100)+'%'));}
- if(heroVisible&&!paused){const p=reduced?0:clamp(-heroSection.getBoundingClientRect().top/innerHeight);heroSection.querySelector('.hero-copy').style.transform='translateY('+(-p*45)+'px)';heroSection.querySelector('.hero-stamp').style.transform='translateY('+(p*95)+'px) rotate(-10deg)';}
+ if(heroVisible&&!paused){const p=reduced?0:clamp(-heroSection.getBoundingClientRect().top/innerHeight);heroSection.style.setProperty('--hero-scroll',p.toFixed(3));heroSection.querySelector('.hero-copy').style.transform='translateY('+(-p*45)+'px)';heroSection.querySelector('.hero-stamp').style.transform='translateY('+(p*95)+'px) rotate(-10deg)';}
 }
 requestAnimationFrame(cinema);
 // Progressive text entrance adds hierarchy to section transitions.
@@ -54600,6 +54600,49 @@ function updateChapter(){
 addEventListener('scroll',updateChapter,{passive:true});
 addEventListener('resize',updateChapter,{passive:true});
 updateChapter();
+
+// Scroll choreography: reveal each new scene once, then let visitors use it normally.
+const entranceObserver=new IntersectionObserver(entries=>{
+ for(const entry of entries)if(entry.isIntersecting){entry.target.classList.add('is-inview');entranceObserver.unobserve(entry.target);}
+},{threshold:.08,rootMargin:'0px 0px 50px 0px'});
+function watchEntrance(element,index=0){
+ if(!element||element.classList.contains('scroll-entrance'))return;
+ element.style.setProperty('--entrance-delay',Math.min(index,5)*95+'ms');
+ element.classList.add('scroll-entrance');
+ entranceObserver.observe(element);
+}
+for(const selector of ['.arena-shell','.sim-screen','.mentor-grid .portrait','.mentor-grid>div:last-child'])
+ document.querySelectorAll(selector).forEach(watchEntrance);
+for(const selector of ['.sim-chapter','.gallery-tile','.mission-values>div'])
+ document.querySelectorAll(selector).forEach((element,index)=>watchEntrance(element,index));
+const cardContainer=document.querySelector('#cards');
+function watchCards(){[...cardContainer.children].forEach((element,index)=>watchEntrance(element,index));}
+watchCards();
+new MutationObserver(watchCards).observe(cardContainer,{childList:true});
+
+// Red ink travels down each scene as it crosses the viewing area.
+const inkScenes=[...document.querySelectorAll('#arena,#simulations,#team,#journey,#gallery')];
+for(const scene of inkScenes){const ink=document.createElement('i');ink.className='scene-ink';ink.setAttribute('aria-hidden','true');scene.append(ink);}
+const sceneVisibility=new IntersectionObserver(entries=>{
+ for(const entry of entries)entry.target.dataset.scrollVisible=entry.isIntersecting?'true':'false';
+},{rootMargin:'100px'});
+inkScenes.forEach(scene=>sceneVisibility.observe(scene));
+let sceneFrame=0;
+function updateSceneInk(){
+ if(sceneFrame)return;
+ sceneFrame=requestAnimationFrame(()=>{
+  sceneFrame=0;
+  if(cinematicReduced.matches||document.body.classList.contains('paused'))return;
+  for(const scene of inkScenes)if(scene.dataset.scrollVisible==='true'){
+   const rect=scene.getBoundingClientRect();
+   const progress=clamp((innerHeight*.78-rect.top)/(rect.height+innerHeight*.1));
+   scene.style.setProperty('--scene-progress',progress.toFixed(3));
+  }
+ });
+}
+addEventListener('scroll',updateSceneInk,{passive:true});
+addEventListener('resize',updateSceneInk,{passive:true});
+updateSceneInk();
 
 // Pointer lighting follows the surface, leaving text and hit targets still.
 if(matchMedia('(pointer:fine)').matches){
