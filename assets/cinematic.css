@@ -458,3 +458,13 @@ body.paused .hero-reticle{display:none}
 @media(max-height:560px){.arena-shell:fullscreen .match-intel,.arena-shell.expanded .match-intel,.arena-shell:fullscreen .star-map-row,.arena-shell.expanded .star-map-row{display:none}.arena-shell:fullscreen .match-scoreboard,.arena-shell.expanded .match-scoreboard{top:5px}.arena-shell:fullscreen .match-scoreboard>div,.arena-shell.expanded .match-scoreboard>div{padding:8px}.arena-shell:fullscreen .match-actions,.arena-shell.expanded .match-actions{grid-template-columns:repeat(4,1fr)}.arena-shell:fullscreen .drive-pad button,.arena-shell.expanded .drive-pad button{min-height:29px;min-width:30px}.arena-shell:fullscreen #score-breakdown,.arena-shell.expanded #score-breakdown{display:none}}
 .match-result{position:absolute;inset:50% auto auto 50%;translate:-50% -45%;z-index:5;width:min(390px,calc(100% - 35px));display:flex;flex-direction:column;align-items:center;gap:20px;text-align:center;padding:30px 20px;background:#101c2aef;border:2px solid #e22a51;box-shadow:9px 9px 0 #780f2b,0 20px 70px #0008;color:#fff;backdrop-filter:blur(10px)}
 .match-result[hidden]{display:none}.match-result .mono{font-size:8px;color:#d7a5b8}.match-result strong{font:italic 700 49px/.9 'Barlow Condensed'}.match-result b{font:700 22px 'Barlow Condensed';color:#d4e0f0;letter-spacing:.06em}
+/* Named roster roles and supplied portraits. Pending slots remain explicit. */
+.portrait.has-photo:before,.portrait.has-photo:after{content:none}
+.portrait.has-photo img{display:block;max-width:none}
+.member-role{display:block;font:700 9px/1.5 'DM Sans';letter-spacing:.07em;text-transform:uppercase;color:#a80d32;margin-bottom:11px}
+.team .card h3{line-height:1.02;overflow-wrap:normal}
+#profile-role.profile-role{font:700 13px/1.6 'DM Sans';color:#ff9db4;margin:12px 0 5px}
+#profile-school.profile-school{font-size:11px;color:#c3cfdf;margin:0 0 18px}
+#profile-school[hidden]{display:none}
+#profile-bio{white-space:pre-line;line-height:1.9}
+@media(max-width:760px){.member-role{font-size:8px;letter-spacing:.035em}.team .card h3{font-size:27px}.team .card-foot span{font-size:8px}}

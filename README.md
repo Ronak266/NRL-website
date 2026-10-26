@@ -1,6 +1,6 @@
 # Titan Forge / NRL Hyperdrive
 
-The Titan Forge team website: a red, black and white futuristic comic experience built around a photo-referenced Hyperdrive robot. Six member introductions and one mentor profile have reserved image and text slots.
+The Titan Forge team website: a red, black and white futuristic comic experience built around a photo-referenced Hyperdrive robot. The six-member roster is organized by role. Nikshith’s Match Driver & Strategist profile includes his supplied introduction and photograph; other member and mentor slots remain ready for their content.
 
 ## Open it
 
@@ -26,7 +26,7 @@ The visual model uses the supplied prototype photos and NRL references. Its hidd
 
 ## Edit and rebuild
 
-- Team introductions and photo paths: `members` and `mentor` in `index.html`.
+- Team introductions and photo paths: `members` and `mentor` in `index.html`. Local photographs under `assets/team/` are embedded into the standalone preview by the build script.
 - Canonical styling: `assets/cinematic.css`.
 - Geometry: `assets/robot.json` and `scripts/build-hyperdrive-model.py`.
 - Boot, navigation and motion: their corresponding files in `assets`.

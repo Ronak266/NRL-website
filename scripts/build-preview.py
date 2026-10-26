@@ -23,6 +23,12 @@ def embed(m):
  encoded=base64.b64encode((ROOT/path).read_bytes()).decode()
  return attr+'="data:'+mime+';base64,'+encoded+'"'
 html=html.replace('href="assets/forge-simulation.mp4" download','href="#" download')
+# Team photos are referenced from JavaScript data, so embed those paths too.
+def embed_team_photo(m):
+ quote,path=m.group(1),m.group(2)
+ mime='image/png' if Path(path).suffix=='.png' else 'image/jpeg'
+ return quote+'data:'+mime+';base64,'+base64.b64encode((ROOT/path).read_bytes()).decode()+quote
+html=re.sub(r"([\"'])(assets/team/[^\"']+\.(?:jpg|jpeg|png))\1",embed_team_photo,html)
 html=re.sub(r'(src|poster|href)="(assets/[^\"]+)"',embed,html)
 # Embed fonts as well, preserving the exact layout offline.
 html=re.sub(r"url\('(?P<path>assets/[^']+\.ttf)'\)",lambda m:"url('data:font/ttf;base64,"+base64.b64encode((ROOT/m['path']).read_bytes()).decode()+"')",html)
