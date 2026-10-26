@@ -38,3 +38,6 @@ Visual references consulted for lighting and choreography (no third-party footag
 
 ## Interactive practice arena
 The new scene reuses the photo-referenced prototype mesh. Driving, ring pickup and the rectangular arena are deliberately simplified for an interactive website experience, and are not presented as the Hyperdrive field, scoring rules or tested physical robot capabilities. The user's supplied landing ZIP was inspected as a visual/interaction reference; its missing-asset reference bundles are not executed.
+
+## Rule-based match revision, 26 October 2026
+The earlier eight-ring collection exercise has been replaced with a timed Hyperdrive training match. The source linked by the official NRL Resources page was checked again and remains the same manual ID. [Rule trace and simulator limitations](hyperdrive-simulator.md) describe scoring, Starburst/Golden CORE, payload Cargo Bay, Space Station/Apex gates, corrected steering, automated opponents and the distinction between this training approximation and an official event.

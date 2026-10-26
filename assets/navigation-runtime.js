@@ -25,6 +25,7 @@ missionIndex.addEventListener('close',()=>openIndex.setAttribute('aria-expanded'
 for(const link of indexLinks)link.addEventListener('click',event=>{
  event.preventDefault();const target=document.querySelector(link.getAttribute('href'));
  missionIndex.close();
+ if(target.tagName==='DETAILS')target.open=true;
  target.scrollIntoView({behavior:cinematicReduced.matches||document.body.classList.contains('paused')?'auto':'smooth',block:'start'});
  target.setAttribute('tabindex','-1');target.focus({preventScroll:true});
  target.addEventListener('blur',()=>target.removeAttribute('tabindex'),{once:true});

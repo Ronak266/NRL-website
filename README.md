@@ -11,7 +11,7 @@ For the editable source, open `index.html` with its `assets` directory alongside
 ## Experiences
 
 - **Initialization:** a skippable comic opening advances with page/model readiness, bypasses itself for reduced motion, and has a five-second fallback.
-- **Robot game:** the playable practice arena appears immediately after the hero. Choose **Take Control**, then use WASD/arrows and Shift to boost. Touch controls, reset, auto demo, fullscreen and three cameras are included. Eight CORE rings can be collected.
+- **Hyperdrive match:** the game appears immediately after the hero. Drive Red 187 alongside an AI teammate against two blue training bots in a 2:30 active-time match. WASD/arrows steer correctly relative to the robot; Space brakes and Shift enables precision. E picks/places CORE, Q operates the separate PAYLOAD Cargo Bay, H represents the early Human Player STARBURST button, and R changes the selected held CORE. Touch controls, reset, match demo, fullscreen and three cameras are included. High/Star/Apex poles, Golden CORE vaults, STAR MAP bonuses, squad payload bonuses, Space Station endgame states and the final buzzer use the cited manual baseline. Read the on-page **Hyperdrive Playbook** for scoring and legal-action guards.
 - **Engineering explorer:** scrolling separates 147 components and ten individual wire meshes. Drag to orbit, isolate systems, identify a component, choose camera presets, zoom, enable X-ray or switch to wireframe. Manual sliders remain available.
 - **System dossiers:** four animated panels select the corresponding frame, drive, CORE mechanism or electronics view in the explorer.
 - **Motion study:** an original silent 18-second, 1280×720 H.264 visualization has native controls, chapter selection and a download link. It never autoplays and pauses offscreen.
@@ -22,7 +22,7 @@ For the editable source, open `index.html` with its `assets` directory alongside
 
 Three.js is included locally. Physically based materials, reflections and shadows are preferred when WebGL is available; a Canvas renderer provides a fallback.
 
-The visual model uses the supplied prototype photos and NRL references. Its hidden details and dimensions are approximate. The film is rendered visualization, not recorded footage or measured CAD. The game is an illustrative practice mini-game, not the official NRL field, rules or scoring implementation.
+The visual model uses the supplied prototype photos and NRL references. Its hidden details and dimensions are approximate. The film is rendered visualization, not recorded footage or measured CAD. The match implements the documented Hyperdrive scoring objectives and legal-action guards, with schematic geometry, simplified physics and AI. It does not implement a complete referee, penalty or Ranking Point system; the active training clock pauses offscreen. Virtual lift and Cargo Bay attachments do not certify the photographed prototype’s capabilities. See [simulator rules and limitations](docs/hyperdrive-simulator.md).
 
 ## Edit and rebuild
 
@@ -43,7 +43,7 @@ Checks:
 
 ```sh
 node --check assets/portable-viewer.js
-node --test scripts/geometry.test.mjs scripts/arena.test.mjs
+node --test scripts/geometry.test.mjs scripts/arena.test.mjs scripts/arena-runtime.test.mjs
 ```
 
 To reproduce the CPU-rendered film, install Python/Pillow, a C++ compiler with OpenMP and FFmpeg:

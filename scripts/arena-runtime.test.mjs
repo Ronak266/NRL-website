@@ -1,0 +1,30 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+const read=name=>fs.readFileSync(new URL('../'+name,import.meta.url),'utf8');
+const html=read('index.html'),physics=read('assets/arena-physics.js').replaceAll('export ',''),runtime=read('assets/arena-runtime.js');
+const three=await import('data:text/javascript;base64,'+Buffer.from(read('assets/three.module.js')).toString('base64'));
+class Element{
+ constructor(){this.listeners={};this.dataset={};this.attributes={};this.children=[];this.textContent='';this.style={};this.clientWidth=900;this.clientHeight=600;this.hidden=false;}
+ addEventListener(name,fn){(this.listeners[name]??=[]).push(fn)}
+ fire(name,event={}){const e={target:this,key:'',preventDefault(){},...event};for(const fn of this.listeners[name]||[])fn(e);this['on'+name]?.(e)}
+ click(){this.fire('click')}focus(){this.focused=true}setPointerCapture(){}setAttribute(k,v){this.attributes[k]=v}getAttribute(k){return this.attributes[k]}append(node){this.children.push(node)}remove(){}replaceChildren(...nodes){this.children=nodes}
+ getContext(){return new Proxy({},{get:(target,key)=>target[key]??(()=>{}),set:(target,key,value)=>(target[key]=value,true)})}
+}
+function setup(webgl=false){
+ const elements=Object.fromEntries([...html.matchAll(/id="([^"]+)"/g)].map(m=>[m[1],new Element()]));
+ const nodes=attribute=>[...html.matchAll(new RegExp(attribute+'="([^\\"]+)"','g'))].map(m=>{const node=new Element();node.dataset[attribute==='data-drive'?'drive':attribute==='data-drive-camera'?'driveCamera':'matchAction']=m[1];return node;});
+ const drive=nodes('data-drive'),cameras=nodes('data-drive-camera'),actions=nodes('data-match-action'),intersections=[];let frame,now=0,rendered=0,sceneRef;
+ const doc={hidden:false,body:{classList:{contains:()=>false}},getElementById:id=>{assert(elements[id],'Missing game DOM ID '+id);return elements[id]},querySelector:selector=>selector.startsWith('#')?elements[selector.slice(1)]:null,querySelectorAll:selector=>selector==='[data-drive]'?drive:selector==='[data-drive-camera]'?cameras:selector==='[data-match-action]'?actions:[],createElement:()=>new Element(),addEventListener(){}};
+ class Renderer{constructor(){if(!webgl)throw new Error('Test WebGL fallback');this.domElement=new Element();this.shadowMap={};}setPixelRatio(){}setSize(){}dispose(){}render(scene,camera){rendered++;sceneRef=scene;assert(Number.isFinite(camera.aspect));scene.traverse(object=>{assert(Number.isFinite(object.position.x)&&Number.isFinite(object.position.y)&&Number.isFinite(object.position.z));});}}
+ const context={document:doc,window:{addEventListener(){}},matchMedia:()=>({matches:false}),devicePixelRatio:1,THREE:{...three,WebGLRenderer:Renderer},parts:JSON.parse(read('assets/robot.json')),requestAnimationFrame:fn=>frame=fn,ResizeObserver:class{constructor(fn){this.fn=fn}observe(){this.fn()}},IntersectionObserver:class{constructor(fn){intersections.push(fn)}observe(){}}};
+ vm.runInNewContext(physics+'\n'+read('assets/studio-renderer.js').split('// Physically based')[0]+'\n'+runtime,context);
+ return {elements,drive,actions,intersections,tick(count=1){for(let i=0;i<count;i++){now+=34;frame(now)}},rendered:()=>rendered,scene:()=>sceneRef};
+}
+test('fallback initializes all match HUD, countdown and controls without WebGL',()=>{const f=setup();assert.match(f.elements['drive-status'].textContent,/TACTICAL/);assert.equal(f.elements['drive-clock'].textContent,'2:30');f.elements['drive-start'].click();assert(f.elements['drive-stage'].focused);f.tick(10);assert.equal(f.elements['drive-stage'].dataset.matchState,'running');});
+test('real keyboard A and D handlers use the corrected steering polarity',()=>{const f=setup();f.elements['drive-start'].click();f.elements['drive-stage'].fire('keydown',{key:'a'});f.tick(25);assert(Number(f.elements['drive-stage'].dataset.playerYaw)>0);f.elements['drive-reset'].click();f.elements['drive-start'].click();f.elements['drive-stage'].fire('keydown',{key:'d'});f.tick(25);assert(Number(f.elements['drive-stage'].dataset.playerYaw)<0);});
+test('touch left and right match keyboard behavior',()=>{const f=setup();f.elements['drive-start'].click();f.drive.find(b=>b.dataset.drive==='left').fire('pointerdown',{pointerId:1});f.tick(25);assert(Number(f.elements['drive-stage'].dataset.playerYaw)>0);f.elements['drive-reset'].click();f.elements['drive-start'].click();f.drive.find(b=>b.dataset.drive==='right').fire('pointerdown',{pointerId:2});f.tick(25);assert(Number(f.elements['drive-stage'].dataset.playerYaw)<0);});
+test('offscreen pause freezes the training clock and resets input',()=>{const f=setup();f.elements['drive-start'].click();f.tick(20);const time=f.elements['drive-stage'].dataset.matchTime;f.intersections[0]([{isIntersecting:false}]);f.tick(30);assert.equal(f.elements['drive-stage'].dataset.matchTime,time);assert.equal(f.elements['drive-start'].textContent,'RESUME MATCH ▷');});
+test('Human Player button explains the unlock condition instead of granting free gold',()=>{const f=setup();f.elements['drive-start'].click();f.actions.find(b=>b.dataset.matchAction==='starburst').click();assert.match(f.elements['drive-message'].textContent,/PAYLOAD.*4/);assert.match(f.elements['vault-state'].textContent,/LOCKED/);});
+test('Three.js scene geometry and every rendered pose stay finite through a driven turn and reset',()=>{const f=setup(true);f.elements['drive-start'].click();f.elements['drive-stage'].fire('keydown',{key:'w'});f.elements['drive-stage'].fire('keydown',{key:'a'});f.tick(30);assert(f.rendered()>20);let meshes=0;f.scene().traverse(object=>{if(object.isMesh)meshes++});assert(meshes>200);f.elements['drive-reset'].click();f.tick(5);assert.equal(f.elements['drive-stage'].dataset.matchState,'ready');assert.equal(f.elements['drive-clock'].textContent,'2:30');});
