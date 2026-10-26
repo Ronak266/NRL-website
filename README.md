@@ -1,6 +1,6 @@
 # Titan Forge / NRL Hyperdrive
 
-The Titan Forge team website: a red, black and white futuristic comic experience built around a photo-referenced Hyperdrive robot. The six-member roster is organized by role. Nikshith’s Match Driver & Strategist profile includes his supplied introduction and photograph; other member and mentor slots remain ready for their content.
+The Titan Forge team website: a red, black and white futuristic comic experience built around a photo-referenced Hyperdrive robot. The six-member roster is organized by role. Nikshith’s Match Driver & Strategist profile includes his supplied introduction and photograph; Neelima Valiveti’s mentor profile includes her supplied photograph, school role and full introduction. The other five member profiles remain ready for their content.
 
 ## Open it
 

@@ -468,3 +468,11 @@ body.paused .hero-reticle{display:none}
 #profile-school[hidden]{display:none}
 #profile-bio{white-space:pre-line;line-height:1.9}
 @media(max-width:760px){.member-role{font-size:8px;letter-spacing:.035em}.team .card h3{font-size:27px}.team .card-foot span{font-size:8px}}
+/* Mentor biography and supplied photograph, with comfortable mobile reading. */
+.mentor-grid{grid-template-columns:minmax(0,.9fr) minmax(0,1.25fr);gap:clamp(28px,5vw,80px)}
+.mentor-grid .portrait.has-photo{height:460px;border:1px solid #f1476b70;box-shadow:9px 9px 0 #7d1030}
+.mentor-grid h3{font-size:clamp(50px,6vw,78px);line-height:.95;margin:22px 0 19px}
+.mentor-grid .mentor-position{font-size:12px;font-weight:700;color:#ffb4c6;margin:0 0 5px}
+.mentor-grid .mentor-school{font-size:11px;color:#becbdc;margin:0 0 24px}
+.mentor-grid .mentor-intro{font-size:12px;line-height:1.9;color:#c4ceda}
+@media(max-width:760px){.mentor-grid{grid-template-columns:1fr;gap:34px}.mentor-grid .portrait.has-photo{height:380px;width:min(100%,440px);margin:auto}.mentor-grid h3{font-size:54px}.mentor-grid .mentor-intro{font-size:12px}}
