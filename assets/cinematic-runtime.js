@@ -1,4 +1,4 @@
-// Cinematic motion follows the visitor. No scroll hijacking or hidden loading screen.
+// Cinematic motion follows the visitor; native scrolling remains in control.
 const cinematicReduced=matchMedia('(prefers-reduced-motion: reduce)');
 const manifesto=document.querySelector('.manifesto'),manifestoLines=[...document.querySelectorAll('.manifesto-line')],heroSection=document.querySelector('.hero');
 let manifestoVisible=false,heroVisible=true,cinematicFrame=0;

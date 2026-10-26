@@ -4,7 +4,7 @@ import base64,re
 ROOT=Path(__file__).resolve().parents[1]
 geometry=(ROOT/'assets/robot-geometry.js').read_text().replace('export ','')
 model=(ROOT/'assets/robot.json').read_text().strip()
-runtime='\n'.join((ROOT/'assets'/name).read_text().replace('export ','') for name in ['studio-renderer.js','viewer-runtime.js','arena-physics.js','arena-runtime.js','experience-runtime.js','cinematic-runtime.js'])
+runtime='\n'.join((ROOT/'assets'/name).read_text().replace('export ','') for name in ['studio-renderer.js','viewer-runtime.js','arena-physics.js','arena-runtime.js','experience-runtime.js','cinematic-runtime.js','navigation-runtime.js'])
 three=(ROOT/'assets/three.module.js').read_text().replace('\t\t\t \tmaterial', '\t\t\t\tmaterial')
 exports=re.search(r'export \{ (.*?) \};',three,re.S).group(1)
 three=re.sub(r'export \{ .*? \};','',three,flags=re.S)
@@ -18,7 +18,7 @@ html=html.replace('<script src="assets/portable-viewer.js"></script>','<script>'
 html=html.replace('<script src="assets/boot-runtime.js"></script>','<script>'+(ROOT/'assets/boot-runtime.js').read_text()+'</script>')
 def embed(m):
  attr,path=m.group(1),m.group(2);suffix=Path(path).suffix
- mime={'.svg':'image/svg+xml','.jpg':'image/jpeg','.mp4':'video/mp4'}.get(suffix)
+ mime={'.svg':'image/svg+xml','.jpg':'image/jpeg','.png':'image/png','.mp4':'video/mp4'}.get(suffix)
  if not mime:return m.group(0)
  encoded=base64.b64encode((ROOT/path).read_bytes()).decode()
  return attr+'="data:'+mime+';base64,'+encoded+'"'
