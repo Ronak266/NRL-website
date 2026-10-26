@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const source=fs.readFileSync(new URL('../assets/arena-physics.js',import.meta.url),'utf8');
-const {newDriveState,stepDrive,driveInput,newHyperdriveMatch,startHyperdriveMatch,applyHyperdriveAction,stepHyperdriveMatch,matchScore,stationStatus,HYPERDRIVE_FIELD:F}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
+const {newDriveState,stepDrive,driveInput,newHyperdriveMatch,startHyperdriveMatch,applyHyperdriveAction,stepHyperdriveMatch,matchScore,stationStatus,coreInteraction,HYPERDRIVE_FIELD:F}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 const ready=()=>startHyperdriveMatch(newHyperdriveMatch(0));
 function player(s){return s.robots[0];}
 function give(s,kind='red'){const c=s.cores.find(c=>c.kind===kind&&c.squad==='red'&&!['held','pole','drop'].includes(c.location));c.location='held';c.robot='187';player(s).inventory.push(c.id);return c;}
@@ -27,3 +27,7 @@ test('opponent Source and Vault zones cannot be driven through',()=>{let s=ready
 test('Cargo Bay will not load a teammate payload after your own has been delivered',()=>{let s=ready();s.payloads.find(p=>p.team==='187').location='drop';at(s,F.source.red);s=applyHyperdriveAction(s,'187','cargo');assert.equal(player(s).payload,null);assert.equal(s.payloads.find(p=>p.team==='R2').location,'source');});
 test('one robot off-centre does not receive an automatic Balance award',()=>{let s=ready();s.elapsed=120;Object.assign(player(s),{x:F.station.red.x,z:1.2});for(let i=0;i<40;i++)s=stepHyperdriveMatch(s,{},.05);assert.equal(stationStatus(s,player(s)),'dock');assert.equal(player(s).balanceTime,0);});
 test('Space Station side rails require a ramp approach rather than sideways teleporting onto the deck',()=>{let side=ready();side.elapsed=120;Object.assign(player(side),{x:F.station.red.x+1.7,z:0,yaw:-Math.PI/2});for(let i=0;i<60;i++)side=stepHyperdriveMatch(side,{throttle:1},.05);assert(player(side).x>F.station.red.x+.9);let ramp=ready();ramp.elapsed=120;Object.assign(player(ramp),{x:F.station.red.x,z:-3.4,yaw:0});for(let i=0;i<60;i++)ramp=stepHyperdriveMatch(ramp,{throttle:1},.05);assert(player(ramp).z>-1.9);});
+
+test('source doorway prompt and E pickup agree even when a staged CORE is beside the intake',()=>{let s=ready();const c=s.cores.find(c=>c.location==='source'&&c.squad==='red');Object.assign(player(s),{x:c.x+.8,z:c.z,yaw:0,speed:0});const hint=coreInteraction(s,'187');assert.equal(hint.enabled,true);assert.match(hint.label,/E to pick up/);s=applyHyperdriveAction(s,'187','core');assert.equal(player(s).inventory.length,1);});
+test('interaction feedback distinguishes locked vault and full inventory from a legal pickup',()=>{let s=ready();at(s,F.vault.red,-.7);assert.equal(coreInteraction(s,'187').enabled,false);assert.match(coreInteraction(s,'187').label,/LOCKED/);s.squads.red.starburst=true;assert.equal(coreInteraction(s,'187').enabled,true);give(s);give(s);assert.equal(coreInteraction(s,'187').enabled,false);assert.match(coreInteraction(s,'187').label,/limit/);});
+test('context disappears away from pieces and after the buzzer',()=>{const s=ready();assert.equal(coreInteraction(s,'187'),null);s.status='finished';assert.equal(coreInteraction(s,'187'),null);});

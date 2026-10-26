@@ -80,13 +80,23 @@ function act(s,r,action){
    p.stack.push(first.id);first.location='pole';first.pole=p.id;first.x=p.x;first.z=p.z;r.inventory.shift();tell(s,r,p.kind.toUpperCase()+' POLE scored'+(isStarMapComplete(s,p)?' · STAR MAP COMPLETE +10':'')+'.');
   }else{
    if(legalControlCount(s,r)>=2&&!inZone(r,zone)){tell(s,r,'Two-element control limit. Score or deliver before picking up more.');return;}
-   const available=s.cores.filter(c=>c.squad===r.squad&&['floor','source','vault'].includes(c.location)&&distance(r,c)<.95&&facing(r,c)).sort((a,b)=>distance(r,a)-distance(r,b));
+   const available=s.cores.filter(c=>c.squad===r.squad&&['floor','source','vault'].includes(c.location)&&distance(r,c)<(c.location==='floor'?.95:1.2)&&(facing(r,c)||distance(r,c)<.7||c.location==='source'&&inZone(r,HYPERDRIVE_FIELD.source[r.squad],-.1))).sort((a,b)=>distance(r,a)-distance(r,b));
    const core=available[0];if(!core){tell(s,r,first?'Face an available pole, enter your Drop Zone, or collect a second CORE.':'Face a squad CORE or visit your SOURCE ZONE. E picks up; E at a scoring target places it.');return;}
    if(core.kind==='gold'&&!s.squads[r.squad].starburst){tell(s,r,'VAULT LOCKED. Activate STARBURST before retrieving Golden CORE.');return;}
    core.location='held';core.robot=r.id;r.inventory.push(core.id);tell(s,r,core.kind.toUpperCase()+' CORE secured. Choose a legal scoring target.');
   }
  }
  for(const squad of ['red','blue'])if(scoredColoredCores(s,squad)>=10)s.squads[squad].starburst=true;
+}
+// Preview the same rule operation that E executes; no separate eligibility logic.
+export function coreInteraction(state,robotId){
+ const r=state.robots.find(r=>r.id===robotId);if(!r||state.status!=='running')return null;
+ const probe=copyMatch(state),actor=probe.robots.find(r=>r.id===robotId);actor.speed=0;
+ act(probe,actor,'core');
+ if(actor.inventory.length!==r.inventory.length){return {enabled:true,label:actor.inventory.length>r.inventory.length?'E to pick up · '+probe.cores.find(c=>c.id===actor.inventory.at(-1)).kind.toUpperCase()+' CORE':'E to score · selected CORE'};}
+ const near=state.cores.some(c=>c.squad===r.squad&&['floor','source','vault'].includes(c.location)&&distance(r,c)<1.5)||r.inventory.length&&state.poles.some(p=>p.squad===r.squad&&distance(r,p)<1.5);
+ if(!near)return null;
+ return {enabled:false,label:probe.message.startsWith('Face ')?'Move closer and face the CORE · E to pick up':probe.message};
 }
 export function applyHyperdriveAction(state,robotId,action){const s=copyMatch(state),r=s.robots.find(r=>r.id===robotId);if(r)act(s,r,action);return s;}
 function staticBlocked(s,r,x,z,nav=false){
