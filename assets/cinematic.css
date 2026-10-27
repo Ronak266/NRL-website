@@ -492,3 +492,10 @@ body.paused .hero-reticle{display:none}
 .drive-interact[hidden]{display:none}
 .drive-interact:focus-visible{outline:3px solid #fff;outline-offset:4px}
 @media(max-width:760px){.team .portrait.has-photo{height:240px}#profile #modal-photo.has-photo{height:42svh;min-height:260px}.drive-interact{bottom:94px;font-size:11px;padding:11px 14px}}
+
+/* Match viewport: clean broadcast framing and restrained lens shading. */
+#arena .drive-stage:before{content:none}
+#arena .drive-stage:after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;box-shadow:inset 0 0 90px #10141b55;background:linear-gradient(180deg,#10141b22,transparent 25%,transparent 75%,#10141b44)}
+#arena .arena-hud{background:#131923dd;border:1px solid #ced8e42b;box-shadow:0 8px 25px #0003;backdrop-filter:blur(8px)}
+#arena .arena-hud:before{content:none}
+#arena .field-note{z-index:2}

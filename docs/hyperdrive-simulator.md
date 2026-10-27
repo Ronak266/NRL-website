@@ -47,3 +47,12 @@ node --test scripts/geometry.test.mjs scripts/arena.test.mjs scripts/arena-runti
 ```
 
 Tests cover steering direction, touch/keyboard handlers, timed phases, immutable actions, inventory limits, legal targets, vault unlocks, exact patterns, capacity limits, payload handling/bonuses, endgame gates, match termination, AI participation, fallback initialization, offscreen pause and finite Three.js scene poses. The renderer integration test stubs GPU output; it does not replace live browser visual verification.
+
+
+## Competition rendering update · 27 October 2026
+
+The playable Three.js scene now uses a shared complete photo-referenced chassis for all four robots. Fixed hardware is batched by material; wheels have instanced rubber tread blocks, and the separate rear Cargo Bay uses steel rails instead of a wireframe box. Squad bumpers and front/rear number plates identify each robot.
+
+Locally generated foam, brushed-metal, rubber and wood maps add surface variation without a network dependency. The field has a soft-shadow key light, cool fill, a local reflection environment, framed vault panels, station fasteners, capped wooden barriers and a competition-hall surround. The chase camera is lower, and CORE/payload transfers interpolate into their new positions. These are presentation changes: rule state, collision bounds, steering, timing and inventory logic are preserved. The existing 18-second studio video remains a separate illustrative visualization; no generated video is substituted for the playable scene.
+
+GPU output and live browser appearance remain unverified in this environment. Automated renderer tests exercise actual Three.js geometry/material construction with a stubbed GPU renderer, including all four detailed robots, textured field surfaces, environment setup, driven poses, reset, and existing controls.

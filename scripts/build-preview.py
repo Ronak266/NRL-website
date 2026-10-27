@@ -4,7 +4,7 @@ import base64,re
 ROOT=Path(__file__).resolve().parents[1]
 geometry=(ROOT/'assets/robot-geometry.js').read_text().replace('export ','')
 model=(ROOT/'assets/robot.json').read_text().strip()
-runtime='\n'.join((ROOT/'assets'/name).read_text().replace('export ','') for name in ['studio-renderer.js','viewer-runtime.js','arena-physics.js','arena-runtime.js','experience-runtime.js','cinematic-runtime.js','navigation-runtime.js'])
+runtime='\n'.join((ROOT/'assets'/name).read_text().replace('export ','') for name in ['studio-renderer.js','viewer-runtime.js','arena-physics.js','arena-presentation.js','arena-runtime.js','experience-runtime.js','cinematic-runtime.js','navigation-runtime.js'])
 three=(ROOT/'assets/three.module.js').read_text().replace('\t\t\t \tmaterial', '\t\t\t\tmaterial')
 exports=re.search(r'export \{ (.*?) \};',three,re.S).group(1)
 three=re.sub(r'export \{ .*? \};','',three,flags=re.S)
