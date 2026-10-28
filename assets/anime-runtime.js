@@ -1,0 +1,46 @@
+// Manga choreography decorates the page without intercepting game input.
+(()=>{
+ const reduced=matchMedia('(prefers-reduced-motion: reduce)'),hero=document.querySelector('.hero');
+ const decorative=(tag,cls,text='')=>{const node=document.createElement(tag);node.className=cls;node.textContent=text;node.setAttribute('aria-hidden','true');return node;};
+ const strip=decorative('div','anime-eye-strip');const image=document.createElement('img');image.src='assets/manga-titan.svg';image.alt='';image.width=1200;image.height=320;strip.append(image);hero.prepend(strip);
+ hero.append(decorative('span','anime-issue','ISSUE 187 / THE ORIGIN ARC'),decorative('span','anime-impact','FORGE\nAWAKENED.'),decorative('span','anime-sideword','BUILD. BREAK. ASCEND.'));
+ const power=decorative('div','anime-power');power.innerHTML='<span>FORGE POWER</span><i><b></b></i><strong>00%</strong>';document.body.append(power);
+ const chapters=[['#arena','01 / ENTER THE ARENA'],['#assembly','02 / THE MACHINE WITHIN'],['#modules','03 / KNOW YOUR POWER'],['#simulations','04 / MOTION UNLEASHED'],['#team','05 / MEET THE SQUAD'],['#gallery','06 / BEHIND THE BUILD']];
+ const observer=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){entry.target.classList.add('anime-in-view');observer.unobserve(entry.target);}},{threshold:.12});
+ for(const [selector,title] of chapters){const section=document.querySelector(selector);if(!section)continue;section.classList.add('anime-chapter');const ribbon=decorative('div','anime-chapter-ribbon',title);section.prepend(ribbon);observer.observe(section);}
+
+ // A real comic sequence: three illustrated panels link into the live experience.
+ const story=document.createElement('section');story.className='manga-story';story.id='origin-story';story.setAttribute('aria-labelledby','manga-story-title');
+ const drawings=[
+ `<svg viewBox="0 0 400 260" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="4"><path d="m200 24-45 40-7 63 27 24 8 39h35l8-39 31-24-4-63z"/><path d="m155 65 45 22 43-22m-43 22v65m-27 38h36m-34 12h32m-29 12h26M92 42l33 28m-52 55 45-3m-16 90 32-30m172-138-32 28m48 53-42-3m20 90-31-30"/><path d="m32 252 92-31 58 19 44-4 49-31 52 14 58-24"/></g><path d="m170 71 30 14 28-15-6 48-22 19-24-19z" fill="#ed123b"/></svg>`,
+ `<svg viewBox="0 0 400 260" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="4"><path d="m71 137 145-52 117 55-145 66zM71 137v36l117 64 145-66v-31m-145 66v31m-97-125 122-47 90 43M127 91V61l96-36 88 39v59M127 61l88 43 96-40m-96 40v52"/><ellipse cx="103" cy="187" rx="22" ry="32" transform="rotate(-25 103 187)" fill="#151015"/><ellipse cx="275" cy="196" rx="22" ry="32" transform="rotate(25 275 196)" fill="#151015"/><path d="m170 24 17-14m66 14 18-14M26 86l28 21m295-42-22 22"/><circle cx="171" cy="125" r="7"/><circle cx="212" cy="110" r="7"/><path d="m187 116 34 24 35-11" stroke="#ed123b" stroke-width="8"/></g></svg>`,
+ `<svg viewBox="0 0 400 260" fill="none" aria-hidden="true"><path d="m0 0 160 108L40 0m360 0L242 110 370 0M0 260l160-112L45 260m355 0L245 150l120 110" fill="currentColor"/><g stroke="currentColor" stroke-width="5"><ellipse cx="201" cy="133" rx="94" ry="43" transform="rotate(-22 201 133)"/><ellipse cx="201" cy="133" rx="52" ry="20" transform="rotate(-22 201 133)"/><path d="m113 157 7 26c10 24 61 24 109 5s78-49 66-70l-8-24M151 53l14 29m100 109 15 31M48 95l52 18m198 39 62 18"/></g><path d="m137 123 41-22m53 68 39-23" stroke="#ed123b" stroke-width="12"/></svg>`
+ ];
+ const beats=[['01','THE SPARK.','Every build starts with a question.','WHAT IF…?','#journey','OUR MISSION'],['02','THE GRIND.','Ideas become bolts, wires and moving parts.','BUILD. TEST. REPEAT.','#assembly','TAKE IT APART'],['03','THE MOMENT.','Take the controls. Write your own next panel.','YOUR MOVE.','#arena','ENTER THE ARENA']];
+ story.innerHTML='<div class="wrap"><div class="manga-story-head"><div><span class="mono">TITAN FORGE / CHAPTER ZERO</span><h2 id="manga-story-title">THIS IS OUR <em>ORIGIN STORY.</em></h2></div><p>Read the panels. Step into the build.</p></div><div class="manga-panels">'+beats.map((b,i)=>'<a class="manga-panel manga-panel-'+i+'" href="'+b[4]+'"><span class="manga-panel-number">'+b[0]+'</span><div class="manga-panel-art">'+drawings[i]+'</div><span class="manga-speech">'+b[3]+'</span><div class="manga-panel-copy"><h3>'+b[1]+'</h3><p>'+b[2]+'</p><span class="mono">'+b[5]+' ↗</span></div></a>').join('')+'</div><div class="manga-editor-note"><span>TO BE CONTINUED…</span><p>With every iteration.</p><a href="#team">MEET THE CAST ↗</a></div></div>';
+ document.querySelector('.manifesto').before(story);observer.observe(story);
+ for(const [selector,word,note] of [['#simulations','WHIRR.','THE MACHINE COMES ALIVE'],['#team','ASSEMBLE.','SIX MINDS. ONE SQUAD.']]){
+  const target=document.querySelector(selector),cut=decorative('div','manga-scene-cut');cut.innerHTML='<div class="manga-cut-lines"></div><span>'+note+'</span><strong>'+word+'</strong><small>TF / 187</small>';target.before(cut);observer.observe(cut);
+ }
+ document.querySelector('#profile .modal-top .mono').textContent='TITAN FORGE / CHARACTER FILE';
+ hero.querySelector('.intro').classList.add('manga-dialogue');
+ let queued=false;
+ function update(){queued=false;const max=document.documentElement.scrollHeight-innerHeight,p=max>0?Math.min(1,Math.max(0,scrollY/max)):0;power.style.setProperty('--power',p);power.querySelector('strong').textContent=String(Math.round(p*100)).padStart(2,'0')+'%';if(!reduced.matches&&!document.body.classList.contains('paused'))hero.style.setProperty('--manga-shift',Math.min(scrollY*.12,90)+'px');}
+ addEventListener('scroll',()=>{if(!queued){queued=true;requestAnimationFrame(update);}},{passive:true});addEventListener('resize',update);update();
+ document.querySelector('#hero-ignite').addEventListener('click',()=>{hero.classList.toggle('anime-awakened',document.querySelector('#hero-ignite').getAttribute('aria-pressed')==='true');});
+ if(matchMedia('(pointer:fine)').matches)for(const card of document.querySelectorAll('.module-card,.team .card,.photo-panel')){card.addEventListener('pointermove',event=>{if(reduced.matches||document.body.classList.contains('paused'))return;const r=card.getBoundingClientRect();card.style.setProperty('--panel-x',(event.clientX-r.left)/r.width);});card.addEventListener('pointerleave',()=>card.style.setProperty('--panel-x','.5'));}
+
+ // Ink treatment is reversible, so photographs remain available in their original colour.
+ document.body.classList.add('manga-mode');
+ const inkToggle=document.createElement('button');inkToggle.className='manga-mode-toggle';inkToggle.type='button';inkToggle.textContent='MANGA INK ON';inkToggle.setAttribute('aria-pressed','true');inkToggle.setAttribute('aria-label','Manga ink treatment for photos');
+ inkToggle.addEventListener('click',()=>{const active=document.body.classList.toggle('manga-mode');inkToggle.setAttribute('aria-pressed',String(active));inkToggle.textContent=active?'MANGA INK ON':'ORIGINAL PHOTOS';});document.body.append(inkToggle);
+ const pendingAnimations=new Set();
+ const panelEntrance=new IntersectionObserver(entries=>{for(const entry of entries){if(!entry.isIntersecting)continue;panelEntrance.unobserve(entry.target);if(reduced.matches||document.body.classList.contains('paused'))continue;const animation=entry.target.animate([{opacity:.35,transform:'perspective(1000px) translateY(35px) rotateX(7deg)'},{opacity:1,transform:'perspective(1000px) translateY(0) rotateX(0deg)'}],{duration:720,delay:Number(entry.target.dataset.mangaDelay||0),easing:'cubic-bezier(.16,1,.3,1)'});pendingAnimations.add(animation);animation.onfinish=animation.oncancel=()=>pendingAnimations.delete(animation);}},{threshold:.13});
+ function observePanels(root){root.querySelectorAll('.manga-panel,.module-card,.photo-panel,.card').forEach((panel,i)=>{if(panel.dataset.mangaObserved)return;panel.dataset.mangaObserved='true';panel.dataset.mangaDelay=String((i%3)*85);panelEntrance.observe(panel);});}
+ observePanels(document);
+ new MutationObserver(()=>observePanels(document.querySelector('#cards'))).observe(document.querySelector('#cards'),{childList:true});
+ const ambientObserver=new IntersectionObserver(entries=>entries.forEach(entry=>entry.target.classList.toggle('manga-motion-visible',entry.isIntersecting)),{rootMargin:'60px'});
+ document.querySelectorAll('.manga-scene-cut,.anime-eye-strip,.manga-panel').forEach(node=>ambientObserver.observe(node));
+ function synchronizeMotion(){const freeze=reduced.matches||document.body.classList.contains('paused');for(const animation of pendingAnimations){if(reduced.matches)animation.finish();else if(freeze)animation.pause();else animation.play();}}
+ new MutationObserver(synchronizeMotion).observe(document.body,{attributes:true,attributeFilter:['class']});reduced.addEventListener('change',synchronizeMotion);
+})();

@@ -1,9 +1,37 @@
 // Shared geometry for the WebGL and Canvas renderers. Y is up; +Z is the intake.
 export const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+// Fit the actual camera-space bounds, not a bounding sphere. A sphere pulled
+// the wide, shallow robot far away and made it look like a miniature icon.
+export function fitCameraDistance(lo,hi,{yaw,pitch,aspect,fov=34,padding=1.12}){
+ const c=lo.map((v,i)=>(v+hi[i])/2),t=Math.tan(fov*Math.PI/360);
+ const right=[Math.cos(yaw),0,-Math.sin(yaw)],up=[-Math.sin(yaw)*Math.sin(pitch),Math.cos(pitch),-Math.cos(yaw)*Math.sin(pitch)],near=[Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch)];
+ const dot=(a,b)=>a.reduce((sum,v,i)=>sum+v*b[i],0);let distance=0;
+ for(const x of [lo[0],hi[0]])for(const y of [lo[1],hi[1]])for(const z of [lo[2],hi[2]]){
+  const p=[x-c[0],y-c[1],z-c[2]],depth=dot(p,near);
+  distance=Math.max(distance,depth+padding*Math.abs(dot(p,up))/t,depth+padding*Math.abs(dot(p,right))/(t*Math.max(.1,aspect)));
+ }
+ return Math.max(1,distance);
+}
 export function offsetPart(part,separation){
   const t=clamp((separation-(part.delay??part.g*.12))/(1-(part.delay??part.g*.12)));
   const amount=t*t*(3-2*t);
   return part.p.map((v,i)=>v+(part.explode?.[i]||0)*amount);
+}
+export function mechanismPose(part,separation,{grip=1,lift=0}={}){
+ const position=offsetPart(part,separation),rotation=[0,0,0],motion=part.motion||{};
+ // Return to the neutral mechanism pose before the fasteners and housings open.
+ const blend=1-clamp(separation/.18),close=clamp(grip)*blend,raise=clamp(lift)*blend;
+ if(motion.lift)position[1]+=.35*raise;
+ if(motion.jaw)position[0]-=motion.jaw*.24*close;
+ if(motion.heldCore&&grip>=.9)position[1]+=.35*raise;
+ if(motion.rotor==='grip')rotation[1]=-close*.24/.13;
+ if(motion.rotor==='lift')rotation[0]=-raise*.35/.17;
+ return {position,rotation};
+}
+export function mechanismVertex(part,vertex,index,separation,{lift=0}={}){
+ const q=vertex.slice();
+ if(part.flexLift)q[1]+=.35*clamp(lift)*(1-clamp(separation/.18))*(1-Math.floor(index/8)/23);
+ return q;
 }
 export function projectPoint(point,{yaw,pitch,width,height,scale=1,distance=8}){
   let [x,y,z]=point;
@@ -15,12 +43,14 @@ export function projectPoint(point,{yaw,pitch,width,height,scale=1,distance=8}){
   const f=Math.min(width*1.15,height*1.8)*scale/Math.max(1,distance+zz);
   return [width/2+xx*f,height*.52-yy*f,zz];
 }
-export function polygonsFor(parts,separation,view,spin=0){
+export function polygonsFor(parts,separation,view,spin=0,mechanism={}){
   const polygons=[];
   for(const part of parts){
-    const p=offsetPart(part,separation);
-    const world=part.v.map(v=>{
-      let q=v.map((v,i)=>v+p[i]);
+    const pose=mechanismPose(part,separation,mechanism),p=pose.position;
+    const world=part.v.map((v,index)=>{
+      let q=mechanismVertex(part,v,index,separation,mechanism);
+      for(let axis=0;axis<3;axis++){const a=pose.rotation[axis];if(!a)continue;const i=(axis+1)%3,j=(axis+2)%3,u=q[i],w=q[j];q[i]=u*Math.cos(a)-w*Math.sin(a);q[j]=u*Math.sin(a)+w*Math.cos(a);}
+      q=q.map((v,i)=>v+p[i]);
       if(part.wheel){const center=part.wheel.map((v,i)=>v+p[i]-part.p[i]),y=q[1]-center[1],z=q[2]-center[2];q[1]=center[1]+y*Math.cos(spin)-z*Math.sin(spin);q[2]=center[2]+y*Math.sin(spin)+z*Math.cos(spin);}
       return q;
     });

@@ -12,7 +12,7 @@ For the editable source, open `index.html` with its `assets` directory alongside
 
 - **Initialization:** a skippable comic opening advances with page/model readiness, bypasses itself for reduced motion, and has a five-second fallback.
 - **Hyperdrive match:** the game appears immediately after the hero. Drive Red 187 alongside an AI teammate against two blue training bots in a 2:30 active-time match. WASD/arrows steer correctly relative to the robot; Space brakes and Shift enables precision. E picks/places CORE, Q operates the separate PAYLOAD Cargo Bay, H represents the early Human Player STARBURST button, and R changes the selected held CORE. Touch controls, reset, match demo, fullscreen and three cameras are included. High/Star/Apex poles, Golden CORE vaults, STAR MAP bonuses, squad payload bonuses, Space Station endgame states and the final buzzer use the cited manual baseline. Read the on-page **Hyperdrive Playbook** for scoring and legal-action guards.
-- **Engineering explorer:** scrolling separates 147 components and ten individual wire meshes. Drag to orbit, isolate systems, identify a component, choose camera presets, zoom, enable X-ray or switch to wireframe. Manual sliders remain available.
+- **Engineering explorer:** scrolling separates 290 components and 20 individual wire meshes. Drag to orbit, isolate systems, identify a component, choose camera presets, zoom, enable X-ray or switch to wireframe. Manual sliders remain available.
 - **System dossiers:** four animated panels select the corresponding frame, drive, CORE mechanism or electronics view in the explorer.
 - **Motion study:** an original silent 18-second, 1280×720 H.264 visualization has native controls, chapter selection and a download link. It never autoplays and pauses offscreen.
 - **Team directory:** six member slots and a mentor slot open native profile dialogs.
@@ -43,7 +43,7 @@ Checks:
 
 ```sh
 node --check assets/portable-viewer.js
-node --test scripts/geometry.test.mjs scripts/arena.test.mjs scripts/arena-runtime.test.mjs
+node --test scripts/*.test.mjs
 ```
 
 To reproduce the CPU-rendered film, install Python/Pillow, a C++ compiler with OpenMP and FFmpeg:
@@ -65,3 +65,9 @@ The website includes no public editing UI, backend write endpoint or authenticat
 The GitHub repository contains the full site. GitHub Pages publication remains pending owner authorization.
 
 [Hyperdrive reference research and model limits](docs/hyperdrive-reference-notes.md).
+
+Mechanical explorer detail: recessed hex sockets, captive washers and continuous helical threads are modelled as geometry. Hollow aluminium U-channels, chamfered edges, bored bearings, folded mounting angles and brass standoffs use studio-lit metal materials. Fasteners rotate as they withdraw. The 290-part assembly remains an illustrative, photo-referenced model rather than measured manufacturing CAD.
+
+The explorer uses a neutral studio sweep, a ground plane at tyre contact height, soft variance shadows and camera-space framing. Tyres have rounded sidewalls and open six-spoke hubs; rubber grain and PCB traces are local procedural textures. Disassembly follows mounting axes and retains soldered controller components together. No external model or texture downloads are required.
+
+The complete pickup module contains two visible geared servos, a rack-driven guided lift, a pinion driving opposing gripper racks, rubber jaw pads, linear bearings and 20 independent wiring routes. PETG carriages and jaw supports use object-space print layers; steel fasteners and brass gears retain their physical metal materials. Manga ink remains on the page photos but no longer filters the interactive model. Test Pickup demonstrates grip, lift, lower and release; manual controls protect the raised CORE. This is a proposed completion of the photographed chassis, not validated fabrication CAD. See [pickup design](docs/core-gripper-design.md).

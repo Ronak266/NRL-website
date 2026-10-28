@@ -7,7 +7,7 @@ function mountViewer(host,fallback,{hero=false,softwareOnly=false}={}){
  canvas.className='robot-canvas';canvas.setAttribute('role','img');
  canvas.setAttribute('aria-label',hero?'Animated three-dimensional Hyperdrive chassis. Drag to rotate.':'Interactive Hyperdrive chassis. Drag to rotate, or use the rotation, assembly and wireframe controls.');
  host.append(canvas);fallback.style.display='none';host.classList.add('has-3d');
- if(!hero)document.querySelector('#render-status').textContent='LIVE 3D · 147 COMPONENTS';
+ if(!hero)document.querySelector('#render-status').textContent='LIVE 3D · '+parts.length+' COMPONENTS';
  let w=0,h=0,yaw=.55,pitch=.56,visible=true,drag=false,x=0,y=0,previous=0,frames=0;
  const rotate=document.querySelector('#rotate'),reduced=matchMedia('(prefers-reduced-motion: reduce)');
  if(!hero){rotate.min=-180;rotate.max=180;rotate.value=32;rotate.setAttribute('aria-label','Orbit Hyperdrive chassis');rotate.addEventListener('input',()=>yaw=Number(rotate.value)*Math.PI/180);}
@@ -16,7 +16,7 @@ function mountViewer(host,fallback,{hero=false,softwareOnly=false}={}){
  canvas.onpointerdown=e=>{drag=true;x=e.clientX;y=e.clientY;canvas.setPointerCapture(e.pointerId);};
  canvas.onpointermove=e=>{if(!drag)return;yaw+=(e.clientX-x)*.009;pitch=Math.max(.15,Math.min(1.1,pitch+(e.clientY-y)*.004));x=e.clientX;y=e.clientY;if(!hero)rotate.value=Math.round(yaw*180/Math.PI);};
  canvas.onpointerup=canvas.onpointercancel=()=>drag=false;
- let lastPolygons=[],pointerDown=null;
+ let lastPolygons=[],pointerDown=null,lastRenderKey='';
  if(!hero){
   document.querySelectorAll('[data-camera]').forEach(button=>button.addEventListener('click',()=>{const pose={perspective:[.55,.56],front:[0,.18],top:[0,1.52],side:[Math.PI/2,.18]}[button.dataset.camera];[yaw,pitch]=pose;rotate.value=Math.round(yaw*180/Math.PI);document.querySelectorAll('[data-camera]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));}));
   canvas.addEventListener('pointerdown',e=>pointerDown=[e.clientX,e.clientY]);
@@ -39,17 +39,17 @@ function mountViewer(host,fallback,{hero=false,softwareOnly=false}={}){
   const view={yaw,pitch,width:w,height:h,scale:hero?.93:1,distance:8+separation*9};
   const focus=hero?'all':host.dataset.system||'all';
   const wire=!hero&&document.querySelector('#wire').getAttribute('aria-pressed')==='true';
+  // A resting assembly needs no redraw; reserve CPU time for real interaction.
+  const renderKey=[w,h,yaw,pitch,separation,focus,wire,host.dataset.grip,host.dataset.lift,document.querySelector('#zoom').value,document.querySelector('#xray').getAttribute('aria-pressed')].join('|');
+  if(renderKey===lastRenderKey)return;lastRenderKey=renderKey;
   ctx.globalAlpha=1;ctx.clearRect(0,0,w,h);
   if(!hero){
-   const bg=ctx.createLinearGradient(0,0,w,h);bg.addColorStop(0,'#141418');bg.addColorStop(.5,'#24242a');bg.addColorStop(1,'#0d0d11');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
-   ctx.lineWidth=.6;ctx.strokeStyle='#ffffff06';
-   for(let i=0;i<w;i+=36){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,h);ctx.stroke();}
-   for(let i=0;i<h;i+=36){ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(w,i);ctx.stroke();}
+   const bg=ctx.createLinearGradient(0,0,0,h);bg.addColorStop(0,'#e4e6e2');bg.addColorStop(1,'#cbd0cb');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
   }
   // Soft contact shadow grounds the assembled chassis and fades during disassembly.
   ctx.save();ctx.translate(w*.5,h*.77);ctx.scale(1,.21);
   const shadow=ctx.createRadialGradient(0,0,2,0,0,w*.3);shadow.addColorStop(0,'rgba(0,0,0,'+(.6-separation*.3)+')');shadow.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=shadow;ctx.fillRect(-w*.35,-w*.35,w*.7,w*.7);ctx.restore();
-  const scene=polygonsFor(parts,separation,view);
+  const scene=polygonsFor(parts,separation,view,0,{grip:hero?1:Number(host.dataset.grip??1),lift:hero?0:Number(host.dataset.lift||0)});
   const polygons=fitPolygons(focus==='all'?scene:scene.filter(p=>p.system===focus),w,h,hero?Math.max(60,w*.1):Math.max(38,Math.min(w,h)*.08));
   const zoom=hero?1:Number(document.querySelector('#zoom').value)/100;
   lastPolygons=polygons.map(poly=>({...poly,points:poly.points.map(([x,y,z])=>[w/2+(x-w/2)*zoom,h/2+(y-h/2)*zoom,z])}));
