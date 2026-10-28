@@ -89,13 +89,13 @@ async function playClip(at){
  try{
   await ready();if(id!==requestId)return;
   if(Number.isFinite(at))video.currentTime=Math.min(at,Math.max(0,video.duration-.1));
-  await video.play();playback.textContent='Playing · 720p · silent';
+  await video.play();playback.textContent='Playing · 540p · silent';
  }catch(error){playback.textContent='Use the video’s play button, or download the MP4 below. '+error.message;}
  finally{start.disabled=false;}
 }
 start.addEventListener('click',()=>playClip(video.ended?0:undefined));
 document.querySelectorAll('[data-chapter]').forEach(button=>button.addEventListener('click',()=>playClip(Number(button.dataset.chapter))));
-video.addEventListener('playing',()=>{videoScreen.classList.add('is-playing');playback.textContent='Playing · 720p · silent';});
+video.addEventListener('playing',()=>{videoScreen.classList.add('is-playing');playback.textContent='Playing · 540p · silent';});
 video.addEventListener('pause',()=>{videoScreen.classList.remove('is-playing');start.textContent=video.ended?'REPLAY SIMULATION ↻':'CONTINUE SIMULATION ▷';if(!video.ended)playback.textContent='Paused';});
 video.addEventListener('ended',()=>{videoScreen.classList.remove('is-playing');start.textContent='REPLAY SIMULATION ↻';playback.textContent='Finished · choose a chapter or replay';});
 video.addEventListener('error',()=>{videoScreen.classList.remove('is-playing');playback.textContent='Video unavailable. Extract the entire ZIP, including the assets folder, or open Titan-Forge-Preview.html.';});

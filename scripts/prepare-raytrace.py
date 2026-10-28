@@ -1,6 +1,7 @@
 """Export shared geometry with angle-weighted hard-edge-preserving smooth normals."""
-import json,math
+import json,math,runpy
 from pathlib import Path
+motion=runpy.run_path(str(Path(__file__).with_name("simulation-motion.py")))
 root=Path(__file__).resolve().parents[1]
 parts=json.loads((root/'assets/robot.json').read_text());triangles=[]
 def cross(a,b):return [a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]
@@ -22,7 +23,7 @@ for p in parts:
    for k in ids:
     nearby=[n for n in adj[k] if sum(n[i]*normal[i] for i in range(3))>.75]
     normals+=normalize([sum(n[i] for n in nearby) for i in range(3)])
-   triangles.append(sum([vertices[i] for i in ids],[])+color+p['explode']+[p.get('delay',0),material]+normals)
+   triangles.append(sum([vertices[i] for i in ids],[])+color+p['explode']+[motion['service_stage'](p)[0],material]+normals+[motion['service_stage'](p)[1]]+p['p']+[{'x':0,'y':1,'z':2}.get(p.get('fastenerAxis'),-1) if p.get('hardware') else -1])
 out=root/'dist/studio-frames';out.mkdir(parents=True,exist_ok=True)
 (root/'dist/studio-triangles.txt').write_text(str(len(triangles))+'\n'+'\n'.join(' '.join(map(str,t)) for t in triangles))
 print(len(triangles),'triangles exported')
