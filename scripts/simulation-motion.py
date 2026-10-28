@@ -11,3 +11,12 @@ def separation(time):
 def progress(part,amount):
     start,end=service_stage(part);t=max(0,min(1,(amount-start)/(end-start)))
     return t*t*(3-2*t)
+
+def wire_layout(part,index,count):
+    """Preserve cable length and thickness in a straight, evenly spaced rack."""
+    import math
+    centers=[[sum(v[j] for v in part['v'][k:k+8])/8 for j in range(3)] for k in range(0,len(part['v']),8)]
+    distances=[0.]
+    for a,b in zip(centers,centers[1:]):distances.append(distances[-1]+math.dist(a,b))
+    x=(index-(count-1)/2)*.23
+    return [[x+.018*math.cos(k%8*math.tau/8),3.25+distances[k//8],-.25+.018*math.sin(k%8*math.tau/8)] for k in range(len(part['v']))]
