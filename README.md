@@ -1,6 +1,6 @@
 # Titan Forge / NRL Hyperdrive
 
-The Titan Forge team website: a red, black and white futuristic comic experience built around a photo-referenced Hyperdrive robot. The six-member roster is organized by role. Ronak’s Lead Programmer and Nikshith’s Match Driver & Strategist profiles include their supplied introductions and photographs; Neelima Valiveti’s mentor profile includes her supplied photograph, school role and full introduction. The other four member profiles remain ready for their content.
+The Titan Forge team website: a red, black and white futuristic comic experience built around a photo-referenced Hyperdrive robot. The six-member roster is organized by role. Krishiv’s Captain, Match Strategist & Lead Driver, Ronak’s Lead Programmer, and Nikshith’s Technician & Match Strategist profiles include their supplied introductions and photographs; Neelima Valiveti’s mentor profile includes her supplied photograph, school role and full introduction. The other three member profiles remain ready for their content.
 
 ## Open it
 
