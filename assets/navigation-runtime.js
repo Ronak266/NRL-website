@@ -62,3 +62,14 @@ for(const dialog of [missionIndex,mediaViewer])dialog.addEventListener('click',e
 
 const ambientObserver=new IntersectionObserver(entries=>{for(const entry of entries)entry.target.dataset.ambientActive=String(entry.isIntersecting);},{rootMargin:'60px'});
 document.querySelectorAll('.module-section,.arena-section,.sim-section').forEach(section=>ambientObserver.observe(section));
+
+// Keep spoken team introductions under the visitor's control.
+const teamIntroVideos=[...document.querySelectorAll('.team-intro-video')];
+for(const video of teamIntroVideos)video.addEventListener('play',()=>{
+ for(const other of teamIntroVideos)if(other!==video)other.pause();
+ document.querySelector('#simulation-video')?.pause();
+});
+const teamVideoVisibility=new IntersectionObserver(entries=>{
+ for(const entry of entries)if(!entry.isIntersecting)entry.target.pause();
+},{threshold:0});
+teamIntroVideos.forEach(video=>teamVideoVisibility.observe(video));
