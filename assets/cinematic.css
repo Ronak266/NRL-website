@@ -750,3 +750,9 @@ body.arena-expanded .manga-mode-toggle{display:none}
 .event-branding a:hover{border-color:#ff718a}
 .event-branding a:focus-visible{outline:2px solid #ff718a;outline-offset:4px}
 @media(max-width:760px){.school-team-logos .school-logo{width:136px;height:86px}.school-team-logos .school-logo img{width:118px;height:68px}.hero-grid{min-height:1000px}.hero-art{top:525px}.event-branding{grid-template-columns:1fr 1fr;gap:14px;padding:12px 0 64px}.event-hyperdrive{grid-column:1/-1;grid-row:1;min-height:170px}.event-brand{padding:18px 12px;min-height:145px}.event-brand>.mono{font-size:7px}.event-brand>img{height:auto;max-height:60px}.event-plaksha>img{max-height:68px}.event-presenter{font-size:10px}.event-presenter img{width:95px;height:34px}}
+
+/* Campus name stays inside the Silver Oaks logo tile. */
+.school-team-logos .school-logo{grid-template-rows:62px auto;gap:4px;padding:8px 8px 9px}
+.school-team-logos .school-logo img{height:62px}
+.school-campus{display:block;color:#fff;font:700 9px/1.2 'DM Sans',sans-serif;letter-spacing:.06em;text-align:center;text-transform:uppercase;white-space:nowrap}
+@media(max-width:760px){.school-team-logos .school-logo{grid-template-rows:54px auto;padding:8px;gap:4px}.school-team-logos .school-logo img{height:54px}.school-campus{font-size:8px;letter-spacing:.035em}}
