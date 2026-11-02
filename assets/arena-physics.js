@@ -101,7 +101,7 @@ export function coreInteraction(state,robotId){
 export function applyHyperdriveAction(state,robotId,action){const s=copyMatch(state),r=s.robots.find(r=>r.id===robotId);if(r)act(s,r,action);return s;}
 function staticBlocked(s,r,x,z,nav=false){
  const radius=nav?.53:.47,enemy=opposite(r.squad);
- for(const squad of ['red','blue']){const p=HYPERDRIVE_FIELD.station[squad],dx=Math.abs(x-p.x),dz=Math.abs(z-p.z);if(squad!==r.squad||s.elapsed<120){if(dx<p.hx+radius&&dz<p.hz+radius)return true;}else if(dx>p.hx-radius-.06&&dx<p.hx+radius+.06&&dz<1.55+radius)return true;}
+ for(const squad of ['red','blue']){const p=HYPERDRIVE_FIELD.station[squad],dx=Math.abs(x-p.x),dz=Math.abs(z-p.z);if(squad!==r.squad||s.elapsed<120){if(dx<p.hx+radius&&dz<p.hz+radius)return true;}else if(dx>p.hx-.12&&dx<p.hx+radius+.06&&dz<1.55+radius)return true;}
  for(const key of ['source','vault']){const p=HYPERDRIVE_FIELD[key][enemy];if(Math.abs(x-p.x)<p.half+radius&&Math.abs(z-p.z)<p.half+radius)return true;}
  for(const p of s.poles)if(p.kind!=='apex'&&Math.hypot(x-p.x,z-p.z)<radius+.12)return true;
  return false;
