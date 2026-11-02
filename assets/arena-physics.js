@@ -148,7 +148,39 @@ export function stepHyperdriveMatch(state,playerInput,seconds,{demo=false}={}){
  stageSources(s);
  for(let i=0;i<s.robots.length;i++){const r=s.robots[i],input=r.id==='187'&&!demo?playerInput:botInput(s,r,dt),next=stepDrive(r,{...input,precision:input.precision||(s.elapsed>=120&&Math.abs(r.x-HYPERDRIVE_FIELD.station[r.squad].x)<1.1&&Math.abs(r.z)<3.1)},dt);
   const blocked=(x,z)=>staticBlocked(s,r,x,z)||s.robots.some(other=>other.id!==r.id&&Math.hypot(x-other.x,z-other.z)<.87);
-  if(blocked(next.x,next.z)){if(!blocked(next.x,r.z)){next.z=r.z;}else if(!blocked(r.x,next.z)){next.x=r.x;}else{next.x=r.x;next.z=r.z;}next.speed=0;next.travel=r.travel;next.distance=r.distance;}
+  // Resolve individual axes without trapping a robot that is already touching a ramp or another robot.
+  // At an existing overlap, accept motion that increases clearance, so reversing can recover.
+  const clearance=(x,z)=>{
+   let free=Infinity;
+   for(const squad of ['red','blue']){
+    const p=HYPERDRIVE_FIELD.station[squad],dx=Math.abs(x-p.x),dz=Math.abs(z-p.z);
+    if(squad!==r.squad||s.elapsed<120){
+     const a=p.hx+.47-dx,b=p.hz+.47-dz;
+     if(a>0&&b>0)free=Math.min(free,-Math.min(a,b));
+    }else{
+     const insideSide=dx>p.hx-.12&&dx<p.hx+.47+.06&&dz<1.55+.47;
+     if(insideSide)free=Math.min(free,-Math.min(dx-(p.hx-.12),p.hx+.47+.06-dx,1.55+.47-dz));
+    }
+   }
+   const enemy=opposite(r.squad);
+   for(const key of ['source','vault']){const p=HYPERDRIVE_FIELD[key][enemy],a=p.half+.47-Math.abs(x-p.x),b=p.half+.47-Math.abs(z-p.z);if(a>0&&b>0)free=Math.min(free,-Math.min(a,b));}
+   for(const p of s.poles)if(p.kind!=='apex'){const d=Math.hypot(x-p.x,z-p.z)-.59;if(d<0)free=Math.min(free,d);}
+   for(const other of s.robots)if(other.id!==r.id){const d=Math.hypot(x-other.x,z-other.z)-.87;if(d<0)free=Math.min(free,d);}
+   return free;
+  };
+  const originClearance=clearance(r.x,r.z);
+  const usable=(x,z)=>!blocked(x,z)||(originClearance<0&&clearance(x,z)>originClearance+1e-6);
+  if(!usable(next.x,next.z)){
+   const xOK=usable(next.x,r.z),zOK=usable(r.x,next.z);
+   if(xOK&&!zOK)next.z=r.z;
+   else if(zOK&&!xOK)next.x=r.x;
+   else if(xOK&&zOK){if(Math.abs(next.x-r.x)>=Math.abs(next.z-r.z))next.z=r.z;else next.x=r.x;}
+   else{next.x=r.x;next.z=r.z;}
+   const moved=Math.hypot(next.x-r.x,next.z-r.z);
+   next.distance=r.distance+moved;
+   next.travel=r.travel+moved*Math.sign(next.speed);
+   if(moved<1e-7)next.speed=0;
+  }
   Object.assign(r,next);
  }
  for(const squad of ['red','blue']){const p=HYPERDRIVE_FIELD.station[squad],supported=s.robots.filter(r=>r.squad===squad&&Math.abs(r.x-p.x)<p.hx-.39&&Math.abs(r.z)<p.hz-.42),level=supported.length&&Math.abs(supported.reduce((sum,r)=>sum+r.z,0)/supported.length)<.22&&supported.every(r=>Math.abs(r.speed)<.25);
