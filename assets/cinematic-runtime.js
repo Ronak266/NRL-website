@@ -44,4 +44,3 @@ for(const tile of document.querySelectorAll('.module-tile'))tile.addEventListene
  document.querySelector('#assembly').scrollIntoView({behavior:cinematicReduced.matches||document.body.classList.contains('paused')?'auto':'smooth',block:'start'});
  tab.focus({preventScroll:true});
 });
-

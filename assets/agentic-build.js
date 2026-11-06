@@ -189,7 +189,7 @@
   }else if(guide.elapsed>=1100){guide.index++;if(guide.index<guide.stops.length)guideMove(guide.stops[guide.index]);else{progressBar.style.transform='scaleX(1)';stopShowcase('BUILD COMPLETE · YOUR TURN');document.body.classList.add('forge-finished');}}
  }
  function tick(time){
-  frame=0;const dt=lastTime?Math.min(time-lastTime,80):16;lastTime=time;
+  frame=0;const dt=lastTime?Math.min(time-lastTime,250):16;lastTime=time;
   if(!document.hidden&&!userPaused&&!document.body.classList.contains('paused')){
    if(quietActive()){clearJobs();return;}
    advanceGuide(dt);
@@ -229,7 +229,7 @@
  }
  all('[data-forge-watch]').forEach(button=>button.addEventListener('click',watch));
  one('#forge-replay').addEventListener('click',watch);
- one('#forge-explore').addEventListener('click',()=>{stopShowcase();scan();});
+ one('#forge-explore').addEventListener('click',()=>{stopShowcase();nodes.filter(visible).forEach(node=>{node.built=true;node.el.dataset.forgeBuilt='true';});});
  all('[data-forge-explore]').forEach(button=>button.addEventListener('click',()=>stopShowcase()));
  pauseButton.addEventListener('click',()=>{
   if(!guide)return;userPaused=!userPaused;updateControls();

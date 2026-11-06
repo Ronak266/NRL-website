@@ -26,6 +26,8 @@ html=re.sub(r'\d+ individual curved wires',f'{wire_count} individual curved wire
 html=re.sub(r'<style>.*?</style>',lambda m:'<style>'+((ROOT/'assets/cinematic.css').read_text(encoding='utf-8')+'\n'+(ROOT/'assets/agentic-build.css').read_text(encoding='utf-8'))+'</style>',html,flags=re.S)
 version=hashlib.sha256(bundle.encode()).hexdigest()[:12]
 html=re.sub(r'<script src="assets/portable-viewer.js(?:\?v=[a-f0-9]+)?"></script>',lambda m:'<script src="assets/portable-viewer.js?v='+version+'"></script>',html)
+build_version=hashlib.sha256((ROOT/'assets/agentic-build.js').read_bytes()).hexdigest()[:12]
+html=re.sub(r'<script src="assets/agentic-build.js(?:\?v=[^"]+)?"></script>',lambda m:'<script src="assets/agentic-build.js?v='+build_version+'"></script>',html)
 (ROOT/'index.html').write_text(html,encoding='utf-8')
 if '--site-only' in sys.argv:
  print('Built GitHub Pages source and local viewer.');sys.exit(0)

@@ -66,7 +66,7 @@ test('wheel, touch, keyboard, scrollbar scrolling and navigation immediately int
 });
 test('Explore releases every animation immediately without changing content or media controls',()=>{
  const f=setup();f.click('.hero [data-forge-watch]');f.tick(25);f.click('#forge-explore');assert.equal(f.d.body.dataset.forgeMode,'explore');
- assert(f.animations.every(a=>a.cancelled));assert(f.get('.team-intro-video').controls);assert.equal(f.d.querySelectorAll('.forge-pending').length,0);f.close();
+ assert(f.animations.every(a=>a.cancelled));const count=f.animations.length;f.tick(200);assert.equal(f.animations.length,count,'Explore must keep the current viewport stable');assert(f.get('.team-intro-video').controls);assert.equal(f.d.querySelectorAll('.forge-pending').length,0);f.close();
 });
 test('showcase reaches all seven chapters and returns a completely usable website',()=>{
  const f=setup();f.click('.hero [data-forge-watch]');f.tick(6000);

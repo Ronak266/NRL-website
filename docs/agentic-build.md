@@ -12,7 +12,7 @@ Near-black surfaces, one vivid red accent, local Barlow Condensed display type a
 
 Normal browsing uses IntersectionObserver plus guarded visible-node scans. Work finishes when its target leaves view. Future content stays visible until its brief entry build; it never requires tour completion. Guided viewing computes viewport-sized stops from connected targets, travels using the same clock, runs concurrent local jobs, pauses for reading and advances. It restores all six profiles and an open playbook before measuring each replay.
 
-Pause freezes scrolling and all reveal clocks. Explore and user input cancel the tour synchronously, cancel finite animations and restore base styles. A deferred scan after input inhibition prevents entry animations being lost when a visitor lands in a new viewport. Resize discards measured work before rebuilding cursor lanes. Hidden-tab time never advances the clock.
+Pause freezes scrolling and all reveal clocks. Explore and user input cancel the tour synchronously, cancel finite animations and restore base styles. A deferred scan after input inhibition prevents entry animations being lost when a visitor lands in a new viewport. Resize discards measured work before rebuilding cursor lanes. Hidden-tab time never advances the clock. The software-rendered hero starts still and offers rotation on demand; both renderers suspend ambient rotation during a guided showcase to leave processing time for selections and input.
 
 ## Interaction and fallback
 
