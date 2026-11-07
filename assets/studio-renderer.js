@@ -139,7 +139,7 @@ function mountStudio(host,fallback,{hero=false}={}){
   }
   renderer.setAnimationLoop(time=>{
    if(!visible||document.hidden||time-last<33)return;const dt=Math.min((time-last)/1000,.05);last=time;
-   const frozen=document.body.classList.contains('paused')||document.body.classList.contains('forge-showcase')||reduced.matches;
+   const frozen=document.body.classList.contains('paused')||reduced.matches;
    if(preset){const amount=frozen?1:1-Math.exp(-dt*7);yaw+=(preset[0]-yaw)*amount;pitch+=(preset[1]-pitch)*amount;rotate.value=Math.round(yaw*180/Math.PI);}
    if(hero&&!frozen&&!paused){ignition+=(Number(host.dataset.ignition||0)-ignition)*(1-Math.exp(-dt*3));orbitals.rotation.y+=dt*(.08+ignition*.22);orbitals.scale.setScalar(1+ignition*.08);orbitals.rotation.z=Math.sin(time*.00025)*.10;pulseLight.intensity=18+ignition*32+Math.sin(time*.001)*7;scan.material.opacity=.12+ignition*.12;scan.position.y=.35+(Math.sin(time*.00065)+1)*.7;heroTiltX+=(heroPointerX*.16-heroTiltX)*.06;heroTiltY+=(heroPointerY*.1-heroTiltY)*.06;}
    if(hero&&!paused&&!drag&&!frozen)yaw+=dt*.10;

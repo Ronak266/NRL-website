@@ -27,15 +27,13 @@ function mountViewer(host,fallback,{hero=false,softwareOnly=false}={}){
    const hit=[...lastPolygons].reverse().find(p=>inside(p.points));document.querySelector('#component-info').textContent=hit?hit.name+' / '+hit.system:'Click any component to identify it';
   });
  }
- // Software rendering stays still until requested, keeping UI input responsive.
- let heroPaused=hero;const toggle=document.querySelector('#hero-orbit');
- if(hero){toggle.textContent='ROTATE MODEL ▷';toggle.setAttribute('aria-pressed','true');}
+ let heroPaused=false;const toggle=document.querySelector('#hero-orbit');
  if(hero)toggle.addEventListener('click',()=>{heroPaused=!heroPaused;toggle.textContent=heroPaused?'RESUME ROTATION ▷':'PAUSE ROTATION Ⅱ';toggle.setAttribute('aria-pressed',String(heroPaused));});
  function render(time){
   requestAnimationFrame(render);
   if(!visible||document.hidden||time-previous<40||!w||!h)return;
   const dt=Math.min((time-previous)/1000,.06);previous=time;
-  const frozen=document.body.classList.contains('paused')||document.body.classList.contains('forge-showcase')||reduced.matches;
+  const frozen=document.body.classList.contains('paused')||reduced.matches;
   if(hero&&!frozen&&!heroPaused&&!drag)yaw+=dt*.22;
   const separation=hero?0:Number(host.dataset.separation||0);
   const view={yaw,pitch,width:w,height:h,scale:hero?.93:1,distance:8+separation*9};

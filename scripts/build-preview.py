@@ -1,10 +1,10 @@
 """Build a local-file-safe classic viewer and a truly self-contained HTML preview."""
 from pathlib import Path
-import base64,re,hashlib,json,sys
+import base64,re,hashlib,json
 ROOT=Path(__file__).resolve().parents[1]
 geometry=(ROOT/'assets/robot-geometry.js').read_text(encoding='utf-8').replace('export ','')
 model=(ROOT/'assets/robot.json').read_text(encoding='utf-8').strip()
-runtime='\n'.join((ROOT/'assets'/name).read_text(encoding='utf-8').replace('export ','') for name in ['studio-renderer.js','viewer-runtime.js','arena-physics.js','arena-presentation.js','arena-runtime.js','experience-runtime.js','mechanism-runtime.js','cinematic-runtime.js','navigation-runtime.js'])
+runtime='\n'.join((ROOT/'assets'/name).read_text(encoding='utf-8').replace('export ','') for name in ['studio-renderer.js','viewer-runtime.js','arena-physics.js','arena-presentation.js','arena-runtime.js','experience-runtime.js','mechanism-runtime.js','cinematic-runtime.js','navigation-runtime.js','anime-runtime.js'])
 three=(ROOT/'assets/three.module.js').read_text(encoding='utf-8').replace('\t\t\t \tmaterial', '\t\t\t\tmaterial')
 exports=re.search(r'export \{ (.*?) \};',three,re.S).group(1)
 three=re.sub(r'export \{ .*? \};','',three,flags=re.S)
@@ -23,16 +23,11 @@ html=re.sub(r'\d+ INDIVIDUAL WIRES',f'{wire_count} INDIVIDUAL WIRES',html)
 html=re.sub(r'(Individual wires <span>)\d+',lambda m:m[1]+str(wire_count),html)
 html=re.sub(r'\d+ individual curved wires',f'{wire_count} individual curved wires',html)
 
-html=re.sub(r'<style>.*?</style>',lambda m:'<style>'+((ROOT/'assets/cinematic.css').read_text(encoding='utf-8')+'\n'+(ROOT/'assets/agentic-build.css').read_text(encoding='utf-8'))+'</style>',html,flags=re.S)
+html=re.sub(r'<style>.*?</style>',lambda m:'<style>'+(ROOT/'assets/cinematic.css').read_text(encoding='utf-8')+'</style>',html,flags=re.S)
 version=hashlib.sha256(bundle.encode()).hexdigest()[:12]
 html=re.sub(r'<script src="assets/portable-viewer.js(?:\?v=[a-f0-9]+)?"></script>',lambda m:'<script src="assets/portable-viewer.js?v='+version+'"></script>',html)
-build_version=hashlib.sha256((ROOT/'assets/agentic-build.js').read_bytes()).hexdigest()[:12]
-html=re.sub(r'<script src="assets/agentic-build.js(?:\?v=[^"]+)?"></script>',lambda m:'<script src="assets/agentic-build.js?v='+build_version+'"></script>',html)
 (ROOT/'index.html').write_text(html,encoding='utf-8')
-if '--site-only' in sys.argv:
- print('Built GitHub Pages source and local viewer.');sys.exit(0)
 html=re.sub(r'<script src="assets/portable-viewer.js(?:\?v=[a-f0-9]+)?"></script>',lambda m:'<script>'+bundle.replace('</script','<\\/script')+'</script>',html)
-html=re.sub(r'<script src="assets/agentic-build.js(?:\?v=[^"]+)?"></script>',lambda m:'<script>'+(ROOT/'assets/agentic-build.js').read_text(encoding='utf-8').replace('</script','<\\/script')+'</script>',html)
 html=html.replace('<script src="assets/boot-runtime.js"></script>','<script>'+(ROOT/'assets/boot-runtime.js').read_text(encoding='utf-8')+'</script>')
 def embed(m):
  attr,path=m.group(1),m.group(2).split('?',1)[0];suffix=Path(path).suffix

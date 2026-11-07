@@ -54381,7 +54381,7 @@ function mountStudio(host,fallback,{hero=false}={}){
   }
   renderer.setAnimationLoop(time=>{
    if(!visible||document.hidden||time-last<33)return;const dt=Math.min((time-last)/1000,.05);last=time;
-   const frozen=document.body.classList.contains('paused')||document.body.classList.contains('forge-showcase')||reduced.matches;
+   const frozen=document.body.classList.contains('paused')||reduced.matches;
    if(preset){const amount=frozen?1:1-Math.exp(-dt*7);yaw+=(preset[0]-yaw)*amount;pitch+=(preset[1]-pitch)*amount;rotate.value=Math.round(yaw*180/Math.PI);}
    if(hero&&!frozen&&!paused){ignition+=(Number(host.dataset.ignition||0)-ignition)*(1-Math.exp(-dt*3));orbitals.rotation.y+=dt*(.08+ignition*.22);orbitals.scale.setScalar(1+ignition*.08);orbitals.rotation.z=Math.sin(time*.00025)*.10;pulseLight.intensity=18+ignition*32+Math.sin(time*.001)*7;scan.material.opacity=.12+ignition*.12;scan.position.y=.35+(Math.sin(time*.00065)+1)*.7;heroTiltX+=(heroPointerX*.16-heroTiltX)*.06;heroTiltY+=(heroPointerY*.1-heroTiltY)*.06;}
    if(hero&&!paused&&!drag&&!frozen)yaw+=dt*.10;
@@ -54436,15 +54436,13 @@ function mountViewer(host,fallback,{hero=false,softwareOnly=false}={}){
    const hit=[...lastPolygons].reverse().find(p=>inside(p.points));document.querySelector('#component-info').textContent=hit?hit.name+' / '+hit.system:'Click any component to identify it';
   });
  }
- // Software rendering stays still until requested, keeping UI input responsive.
- let heroPaused=hero;const toggle=document.querySelector('#hero-orbit');
- if(hero){toggle.textContent='ROTATE MODEL ▷';toggle.setAttribute('aria-pressed','true');}
+ let heroPaused=false;const toggle=document.querySelector('#hero-orbit');
  if(hero)toggle.addEventListener('click',()=>{heroPaused=!heroPaused;toggle.textContent=heroPaused?'RESUME ROTATION ▷':'PAUSE ROTATION Ⅱ';toggle.setAttribute('aria-pressed',String(heroPaused));});
  function render(time){
   requestAnimationFrame(render);
   if(!visible||document.hidden||time-previous<40||!w||!h)return;
   const dt=Math.min((time-previous)/1000,.06);previous=time;
-  const frozen=document.body.classList.contains('paused')||document.body.classList.contains('forge-showcase')||reduced.matches;
+  const frozen=document.body.classList.contains('paused')||reduced.matches;
   if(hero&&!frozen&&!heroPaused&&!drag)yaw+=dt*.22;
   const separation=hero?0:Number(host.dataset.separation||0);
   const view={yaw,pitch,width:w,height:h,scale:hero?.93:1,distance:8+separation*9};
@@ -54621,7 +54619,7 @@ function coreInteraction(state,robotId){
 function applyHyperdriveAction(state,robotId,action){const s=copyMatch(state),r=s.robots.find(r=>r.id===robotId);if(r)act(s,r,action);return s;}
 function staticBlocked(s,r,x,z,nav=false){
  const radius=nav?.53:.47,enemy=opposite(r.squad);
- for(const squad of ['red','blue']){const p=HYPERDRIVE_FIELD.station[squad],dx=Math.abs(x-p.x),dz=Math.abs(z-p.z);if(squad!==r.squad||s.elapsed<120){if(dx<p.hx+radius&&dz<p.hz+radius)return true;}else if(dx>p.hx-.12&&dx<p.hx+radius+.06&&dz<1.55+radius)return true;}
+ for(const squad of ['red','blue']){const p=HYPERDRIVE_FIELD.station[squad],dx=Math.abs(x-p.x),dz=Math.abs(z-p.z);if(squad!==r.squad||s.elapsed<120){if(dx<p.hx+radius&&dz<p.hz+radius)return true;}else if(dx>p.hx-radius-.06&&dx<p.hx+radius+.06&&dz<1.55+radius)return true;}
  for(const key of ['source','vault']){const p=HYPERDRIVE_FIELD[key][enemy];if(Math.abs(x-p.x)<p.half+radius&&Math.abs(z-p.z)<p.half+radius)return true;}
  for(const p of s.poles)if(p.kind!=='apex'&&Math.hypot(x-p.x,z-p.z)<radius+.12)return true;
  return false;
@@ -54668,39 +54666,7 @@ function stepHyperdriveMatch(state,playerInput,seconds,{demo=false}={}){
  stageSources(s);
  for(let i=0;i<s.robots.length;i++){const r=s.robots[i],input=r.id==='187'&&!demo?playerInput:botInput(s,r,dt),next=stepDrive(r,{...input,precision:input.precision||(s.elapsed>=120&&Math.abs(r.x-HYPERDRIVE_FIELD.station[r.squad].x)<1.1&&Math.abs(r.z)<3.1)},dt);
   const blocked=(x,z)=>staticBlocked(s,r,x,z)||s.robots.some(other=>other.id!==r.id&&Math.hypot(x-other.x,z-other.z)<.87);
-  // Resolve individual axes without trapping a robot that is already touching a ramp or another robot.
-  // At an existing overlap, accept motion that increases clearance, so reversing can recover.
-  const clearance=(x,z)=>{
-   let free=Infinity;
-   for(const squad of ['red','blue']){
-    const p=HYPERDRIVE_FIELD.station[squad],dx=Math.abs(x-p.x),dz=Math.abs(z-p.z);
-    if(squad!==r.squad||s.elapsed<120){
-     const a=p.hx+.47-dx,b=p.hz+.47-dz;
-     if(a>0&&b>0)free=Math.min(free,-Math.min(a,b));
-    }else{
-     const insideSide=dx>p.hx-.12&&dx<p.hx+.47+.06&&dz<1.55+.47;
-     if(insideSide)free=Math.min(free,-Math.min(dx-(p.hx-.12),p.hx+.47+.06-dx,1.55+.47-dz));
-    }
-   }
-   const enemy=opposite(r.squad);
-   for(const key of ['source','vault']){const p=HYPERDRIVE_FIELD[key][enemy],a=p.half+.47-Math.abs(x-p.x),b=p.half+.47-Math.abs(z-p.z);if(a>0&&b>0)free=Math.min(free,-Math.min(a,b));}
-   for(const p of s.poles)if(p.kind!=='apex'){const d=Math.hypot(x-p.x,z-p.z)-.59;if(d<0)free=Math.min(free,d);}
-   for(const other of s.robots)if(other.id!==r.id){const d=Math.hypot(x-other.x,z-other.z)-.87;if(d<0)free=Math.min(free,d);}
-   return free;
-  };
-  const originClearance=clearance(r.x,r.z);
-  const usable=(x,z)=>!blocked(x,z)||(originClearance<0&&clearance(x,z)>originClearance+1e-6);
-  if(!usable(next.x,next.z)){
-   const xOK=usable(next.x,r.z),zOK=usable(r.x,next.z);
-   if(xOK&&!zOK)next.z=r.z;
-   else if(zOK&&!xOK)next.x=r.x;
-   else if(xOK&&zOK){if(Math.abs(next.x-r.x)>=Math.abs(next.z-r.z))next.z=r.z;else next.x=r.x;}
-   else{next.x=r.x;next.z=r.z;}
-   const moved=Math.hypot(next.x-r.x,next.z-r.z);
-   next.distance=r.distance+moved;
-   next.travel=r.travel+moved*Math.sign(next.speed);
-   if(moved<1e-7)next.speed=0;
-  }
+  if(blocked(next.x,next.z)){if(!blocked(next.x,r.z)){next.z=r.z;}else if(!blocked(r.x,next.z)){next.x=r.x;}else{next.x=r.x;next.z=r.z;}next.speed=0;next.travel=r.travel;next.distance=r.distance;}
   Object.assign(r,next);
  }
  for(const squad of ['red','blue']){const p=HYPERDRIVE_FIELD.station[squad],supported=s.robots.filter(r=>r.squad===squad&&Math.abs(r.x-p.x)<p.hx-.39&&Math.abs(r.z)<p.hz-.42),level=supported.length&&Math.abs(supported.reduce((sum,r)=>sum+r.z,0)/supported.length)<.22&&supported.every(r=>Math.abs(r.speed)<.25);
@@ -54869,6 +54835,10 @@ xrayButton.addEventListener('click',()=>{const on=xrayButton.getAttribute('aria-
 let progressPending=false;
 function updateReading(){const height=document.documentElement.scrollHeight-innerHeight;document.querySelector('#reading-progress').style.transform='scaleX('+(height>0?clamp(scrollY/height):0)+')';progressPending=false;}
 addEventListener('scroll',()=>{if(!progressPending){progressPending=true;requestAnimationFrame(updateReading);}},{passive:true});addEventListener('resize',updateReading);updateReading();
+if(matchMedia('(pointer:fine)').matches){
+ document.querySelector('#cards').addEventListener('pointermove',e=>{const card=e.target.closest('.card');if(!card||matchMedia('(prefers-reduced-motion:reduce)').matches||document.body.classList.contains('paused'))return;const r=card.getBoundingClientRect();card.style.transform='perspective(900px) rotateX('+(-(e.clientY-r.top-r.height/2)/r.height*7)+'deg) rotateY('+((e.clientX-r.left-r.width/2)/r.width*7)+'deg) translateY(-4px)';});
+ document.querySelector('#cards').addEventListener('pointerout',e=>{const card=e.target.closest('.card');if(card&&!card.contains(e.relatedTarget))card.style.transform='';});
+}
 
 // Explicit inspection controls for the proposed two-servo pickup module.
 const mechanismHost=document.querySelector('#lab-stage');
@@ -54917,8 +54887,35 @@ document.querySelector('#separation').addEventListener('input',stopPickup);
 document.querySelector('#explode').addEventListener('click',stopPickup);
 setPickupPose(1,0);
 
-// Functional controls; page assembly is coordinated by agentic-build.js.
-const cinematicReduced=matchMedia('(prefers-reduced-motion: reduce)'),heroSection=document.querySelector('.hero');
+// Cinematic motion follows the visitor; native scrolling remains in control.
+const cinematicReduced=matchMedia('(prefers-reduced-motion: reduce)');
+const manifesto=document.querySelector('.manifesto'),manifestoLines=[...document.querySelectorAll('.manifesto-line')],heroSection=document.querySelector('.hero');
+let manifestoVisible=false,heroVisible=true,cinematicFrame=0;
+new IntersectionObserver(entries=>{for(const e of entries){if(e.target===manifesto)manifestoVisible=e.isIntersecting;if(e.target===heroSection)heroVisible=e.isIntersecting;}},{rootMargin:'80px'}).observe(manifesto);
+new IntersectionObserver(entries=>heroVisible=entries[0].isIntersecting,{rootMargin:'80px'}).observe(heroSection);
+function cinema(time){requestAnimationFrame(cinema);if(time-cinematicFrame<32||document.hidden)return;cinematicFrame=time;
+ const reduced=cinematicReduced.matches,paused=document.body.classList.contains('paused');
+ if(manifestoVisible&&!paused){const r=manifesto.getBoundingClientRect();const p=reduced?1:clamp((innerHeight*.6-r.top)/(r.height-innerHeight*.2));manifestoLines.forEach((line,i)=>line.style.setProperty('--fill',(clamp(p*3.8-i)*100)+'%'));}
+ if(heroVisible&&!paused){const p=reduced?0:clamp(-heroSection.getBoundingClientRect().top/innerHeight);heroSection.style.setProperty('--hero-scroll',p.toFixed(3));heroSection.querySelector('.hero-copy').style.transform='translateY('+(-p*45)+'px)';heroSection.querySelector('.hero-stamp').style.transform='translateY('+(p*95)+'px) rotate(-10deg)';}
+}
+requestAnimationFrame(cinema);
+// Progressive text entrance adds hierarchy to section transitions.
+for(const heading of document.querySelectorAll('.section-head h2,.mission h2')){
+ heading.style.transition='transform 1.1s cubic-bezier(.16,1,.3,1),opacity 1.1s';
+ const io=new IntersectionObserver(entries=>{if(entries[0].isIntersecting){if(!cinematicReduced.matches&&!document.body.classList.contains('paused'))heading.animate([{transform:'translateY(35px)',opacity:0},{transform:'translateY(0)',opacity:1}],{duration:1000,easing:'cubic-bezier(.16,1,.3,1)',fill:'both'});io.disconnect();}},{threshold:.15});io.observe(heading);
+}
+// Small magnetic response gives buttons weight without moving their hit target.
+if(matchMedia('(pointer:fine)').matches){for(const button of document.querySelectorAll('.actions .btn,.end .btn')){
+ button.addEventListener('pointermove',e=>{if(cinematicReduced.matches||document.body.classList.contains('paused'))return;const r=button.getBoundingClientRect();button.style.translate=((e.clientX-r.left-r.width/2)*.09)+'px '+((e.clientY-r.top-r.height/2)*.12)+'px';});button.addEventListener('pointerleave',()=>button.style.translate='0 0');
+}}
+cinematicReduced.addEventListener('change',()=>{if(cinematicReduced.matches){manifestoLines.forEach(line=>line.style.setProperty('--fill','100%'));heroSection.querySelector('.hero-copy').style.transform='none';document.getAnimations().forEach(a=>{if(Number.isFinite(a.effect?.getComputedTiming().endTime))a.finish();else a.cancel();});}});
+new MutationObserver(()=>{
+ const paused=document.body.classList.contains('paused');
+ for(const animation of document.getAnimations())if(animation.effect?.target?.matches('.section-head h2,.mission h2')){
+  if(paused&&animation.playState==='running')animation.pause();else if(!paused&&animation.playState==='paused')animation.play();
+ }
+}).observe(document.body,{attributes:true,attributeFilter:['class']});
+
 // A deliberate power switch: gradual light and orbital acceleration, never strobing.
 const ignitionButton=document.querySelector('#hero-ignite');
 ignitionButton.addEventListener('click',()=>{
@@ -54956,6 +54953,96 @@ document.addEventListener('keydown',event=>{
  }
 });
 
+// A compact chapter spine gives the long cinematic page a sense of place.
+const chapterLinks=[...document.querySelectorAll('.scene-rail a')];
+const chapters=chapterLinks.map(link=>({link,section:document.getElementById(link.dataset.scene)}));
+const chapterCue=document.createElement('div');chapterCue.className='chapter-cue mono';chapterCue.setAttribute('aria-hidden','true');
+chapterCue.innerHTML='<b></b><span></span>';document.body.append(chapterCue);
+let chapterFrame=0,currentScene=null,cueTimer=0;
+function updateChapter(){
+ if(chapterFrame)return;
+ chapterFrame=requestAnimationFrame(()=>{
+  chapterFrame=0;
+  const marker=innerHeight*.43;
+  let current=chapters[0];
+  for(const chapter of chapters)if(chapter.section.getBoundingClientRect().top<=marker)current=chapter;
+  for(const chapter of chapters){
+   if(chapter===current)chapter.link.setAttribute('aria-current','location');
+   else chapter.link.removeAttribute('aria-current');
+  }
+  if(current!==currentScene){
+   if(currentScene&&!cinematicReduced.matches&&!document.body.classList.contains('paused')){
+    chapterCue.querySelector('b').textContent=current.link.querySelector('b').textContent;
+    chapterCue.querySelector('span').textContent=current.link.querySelector('span').textContent;
+    chapterCue.classList.remove('is-visible');
+    void chapterCue.offsetWidth;
+    chapterCue.classList.add('is-visible');
+    clearTimeout(cueTimer);cueTimer=setTimeout(()=>chapterCue.classList.remove('is-visible'),1500);
+   }
+   currentScene=current;
+  }
+ });
+}
+addEventListener('scroll',updateChapter,{passive:true});
+addEventListener('resize',updateChapter,{passive:true});
+updateChapter();
+
+// Scroll choreography: reveal each new scene once, then let visitors use it normally.
+const entranceObserver=new IntersectionObserver(entries=>{
+ for(const entry of entries)if(entry.isIntersecting){entry.target.classList.add('is-inview');entranceObserver.unobserve(entry.target);}
+},{threshold:.08,rootMargin:'0px 0px 50px 0px'});
+function watchEntrance(element,index=0){
+ if(!element||element.classList.contains('scroll-entrance'))return;
+ element.style.setProperty('--entrance-delay',Math.min(index,5)*95+'ms');
+ element.classList.add('scroll-entrance');
+ entranceObserver.observe(element);
+}
+for(const selector of ['.sim-screen','.mentor-grid .portrait','.mentor-grid>div:last-child'])
+ document.querySelectorAll(selector).forEach(watchEntrance);
+for(const selector of ['.sim-chapter','.gallery-tile','.mission-values>div','.module-tile'])
+ document.querySelectorAll(selector).forEach((element,index)=>watchEntrance(element,index));
+const cardContainer=document.querySelector('#cards');
+function watchCards(){[...cardContainer.children].forEach((element,index)=>watchEntrance(element,index));}
+watchCards();
+new MutationObserver(watchCards).observe(cardContainer,{childList:true});
+
+// Red ink travels down each scene as it crosses the viewing area.
+const inkScenes=[...document.querySelectorAll('#modules,#arena,#simulations,#team,#journey,#gallery')];
+for(const scene of inkScenes){const ink=document.createElement('i');ink.className='scene-ink';ink.setAttribute('aria-hidden','true');scene.append(ink);}
+const sceneVisibility=new IntersectionObserver(entries=>{
+ for(const entry of entries)entry.target.dataset.scrollVisible=entry.isIntersecting?'true':'false';
+},{rootMargin:'100px'});
+inkScenes.forEach(scene=>sceneVisibility.observe(scene));
+let sceneFrame=0;
+function updateSceneInk(){
+ if(sceneFrame)return;
+ sceneFrame=requestAnimationFrame(()=>{
+  sceneFrame=0;
+  if(cinematicReduced.matches||document.body.classList.contains('paused'))return;
+  for(const scene of inkScenes)if(scene.dataset.scrollVisible==='true'){
+   const rect=scene.getBoundingClientRect();
+   const progress=clamp((innerHeight*.78-rect.top)/(rect.height+innerHeight*.1));
+   scene.style.setProperty('--scene-progress',progress.toFixed(3));
+  }
+ });
+}
+addEventListener('scroll',updateSceneInk,{passive:true});
+addEventListener('resize',updateSceneInk,{passive:true});
+updateSceneInk();
+
+// Pointer lighting follows the surface, leaving text and hit targets still.
+if(matchMedia('(pointer:fine)').matches){
+ for(const surface of document.querySelectorAll('.card,.gallery-tile,.sim-screen,.module-tile')){
+  surface.classList.add('light-surface');
+  surface.addEventListener('pointermove',event=>{
+   if(cinematicReduced.matches||document.body.classList.contains('paused'))return;
+   const rect=surface.getBoundingClientRect();
+   surface.style.setProperty('--light-x',event.clientX-rect.left+'px');
+   surface.style.setProperty('--light-y',event.clientY-rect.top+'px');
+  });
+ }
+}
+
 // Module panels are real shortcuts into the matching subassembly.
 for(const tile of document.querySelectorAll('.module-tile'))tile.addEventListener('click',()=>{
  const tab=document.querySelector('.system-tabs button[data-system="'+tile.dataset.systemJump+'"]');
@@ -54963,6 +55050,50 @@ for(const tile of document.querySelectorAll('.module-tile'))tile.addEventListene
  document.querySelector('#assembly').scrollIntoView({behavior:cinematicReduced.matches||document.body.classList.contains('paused')?'auto':'smooth',block:'start'});
  tab.focus({preventScroll:true});
 });
+
+// The reticle tracks an intentional robot interaction without changing its drag controls.
+if(matchMedia('(pointer:fine)').matches){
+ const art=document.querySelector('.hero-art'),reticle=art.querySelector('.hero-reticle');
+ let reticleFrame=0,pointerX=0,pointerY=0;
+ art.addEventListener('pointermove',event=>{
+  if(cinematicReduced.matches||document.body.classList.contains('paused'))return;
+  const r=art.getBoundingClientRect();pointerX=event.clientX-r.left;pointerY=event.clientY-r.top;
+  if(reticleFrame)return;
+  reticleFrame=requestAnimationFrame(()=>{
+   reticleFrame=0;reticle.style.translate=pointerX+'px '+pointerY+'px';
+   reticle.classList.add('is-visible');
+  });
+ });
+ art.addEventListener('pointerleave',()=>reticle.classList.remove('is-visible','is-dragging'));
+ art.addEventListener('pointerdown',event=>{
+  if(event.target.closest('button'))return;
+  reticle.classList.add('is-dragging');reticle.querySelector('span').textContent='ROTATING 187';
+ });
+ for(const name of ['pointerup','pointercancel'])art.addEventListener(name,()=>{
+  reticle.classList.remove('is-dragging');reticle.querySelector('span').textContent='DRAG TO ORBIT';
+ });
+}
+
+// Team stats count only when visitors reach the mission, then keep their final value.
+const stats=[...document.querySelectorAll('.mission-values b')].filter(element=>/^\d+$/.test(element.textContent.trim()));
+const statObserver=new IntersectionObserver(entries=>{
+ if(!entries[0].isIntersecting)return;
+ statObserver.disconnect();
+ if(cinematicReduced.matches||document.body.classList.contains('paused'))return;
+ const start=performance.now();
+ function count(now){
+  const fraction=Math.min(1,(now-start)/1100),eased=1-Math.pow(1-fraction,3);
+  for(const element of stats){
+   const final=Number(element.dataset.finalCount);
+   element.textContent=String(Math.round(final*eased)).padStart(element.dataset.finalCount.length,'0');
+  }
+  if(fraction<1&&!document.body.classList.contains('paused'))requestAnimationFrame(count);
+  else for(const element of stats)element.textContent=element.dataset.finalCount;
+ }
+ requestAnimationFrame(count);
+},{threshold:.45});
+for(const element of stats)element.dataset.finalCount=element.textContent.trim();
+statObserver.observe(document.querySelector('.mission-values'));
 
 // Local navigation and media inspection use native dialogs and stay fully offline.
 const missionIndex=document.querySelector('#site-index'),openIndex=document.querySelector('#open-index'),indexSearch=document.querySelector('#index-search');
@@ -55039,5 +55170,52 @@ const teamVideoVisibility=new IntersectionObserver(entries=>{
  for(const entry of entries)if(!entry.isIntersecting)entry.target.pause();
 },{threshold:0});
 teamIntroVideos.forEach(video=>teamVideoVisibility.observe(video));
+
+// Manga choreography decorates the page without intercepting game input.
+(()=>{
+ const reduced=matchMedia('(prefers-reduced-motion: reduce)'),hero=document.querySelector('.hero');
+ const decorative=(tag,cls,text='')=>{const node=document.createElement(tag);node.className=cls;node.textContent=text;node.setAttribute('aria-hidden','true');return node;};
+ const strip=decorative('div','anime-eye-strip');const image=document.createElement('img');image.src='assets/manga-titan.svg';image.alt='';image.width=1200;image.height=320;strip.append(image);hero.prepend(strip);
+ hero.append(decorative('span','anime-issue','ISSUE 187 / THE ORIGIN ARC'),decorative('span','anime-impact','FORGE\nAWAKENED.'),decorative('span','anime-sideword','BUILD. BREAK. ASCEND.'));
+ const power=decorative('div','anime-power');power.innerHTML='<span>FORGE POWER</span><i><b></b></i><strong>00%</strong>';document.body.append(power);
+ const chapters=[['#arena','01 / ENTER THE ARENA'],['#assembly','02 / THE MACHINE WITHIN'],['#modules','03 / KNOW YOUR POWER'],['#simulations','04 / MOTION UNLEASHED'],['#team','05 / MEET THE SQUAD'],['#gallery','06 / BEHIND THE BUILD']];
+ const observer=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){entry.target.classList.add('anime-in-view');observer.unobserve(entry.target);}},{threshold:.12});
+ for(const [selector,title] of chapters){const section=document.querySelector(selector);if(!section)continue;section.classList.add('anime-chapter');const ribbon=decorative('div','anime-chapter-ribbon',title);section.prepend(ribbon);observer.observe(section);}
+
+ // A real comic sequence: three illustrated panels link into the live experience.
+ const story=document.createElement('section');story.className='manga-story';story.id='origin-story';story.setAttribute('aria-labelledby','manga-story-title');
+ const drawings=[
+ `<svg viewBox="0 0 400 260" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="4"><path d="m200 24-45 40-7 63 27 24 8 39h35l8-39 31-24-4-63z"/><path d="m155 65 45 22 43-22m-43 22v65m-27 38h36m-34 12h32m-29 12h26M92 42l33 28m-52 55 45-3m-16 90 32-30m172-138-32 28m48 53-42-3m20 90-31-30"/><path d="m32 252 92-31 58 19 44-4 49-31 52 14 58-24"/></g><path d="m170 71 30 14 28-15-6 48-22 19-24-19z" fill="#ed123b"/></svg>`,
+ `<svg viewBox="0 0 400 260" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="4"><path d="m71 137 145-52 117 55-145 66zM71 137v36l117 64 145-66v-31m-145 66v31m-97-125 122-47 90 43M127 91V61l96-36 88 39v59M127 61l88 43 96-40m-96 40v52"/><ellipse cx="103" cy="187" rx="22" ry="32" transform="rotate(-25 103 187)" fill="#151015"/><ellipse cx="275" cy="196" rx="22" ry="32" transform="rotate(25 275 196)" fill="#151015"/><path d="m170 24 17-14m66 14 18-14M26 86l28 21m295-42-22 22"/><circle cx="171" cy="125" r="7"/><circle cx="212" cy="110" r="7"/><path d="m187 116 34 24 35-11" stroke="#ed123b" stroke-width="8"/></g></svg>`,
+ `<svg viewBox="0 0 400 260" fill="none" aria-hidden="true"><path d="m0 0 160 108L40 0m360 0L242 110 370 0M0 260l160-112L45 260m355 0L245 150l120 110" fill="currentColor"/><g stroke="currentColor" stroke-width="5"><ellipse cx="201" cy="133" rx="94" ry="43" transform="rotate(-22 201 133)"/><ellipse cx="201" cy="133" rx="52" ry="20" transform="rotate(-22 201 133)"/><path d="m113 157 7 26c10 24 61 24 109 5s78-49 66-70l-8-24M151 53l14 29m100 109 15 31M48 95l52 18m198 39 62 18"/></g><path d="m137 123 41-22m53 68 39-23" stroke="#ed123b" stroke-width="12"/></svg>`
+ ];
+ const beats=[['01','THE SPARK.','Every build starts with a question.','WHAT IF…?','#journey','OUR MISSION'],['02','THE GRIND.','Ideas become bolts, wires and moving parts.','BUILD. TEST. REPEAT.','#assembly','TAKE IT APART'],['03','THE MOMENT.','Take the controls. Write your own next panel.','YOUR MOVE.','#arena','ENTER THE ARENA']];
+ story.innerHTML='<div class="wrap"><div class="manga-story-head"><div><span class="mono">TITAN FORGE / CHAPTER ZERO</span><h2 id="manga-story-title">THIS IS OUR <em>ORIGIN STORY.</em></h2></div><p>Read the panels. Step into the build.</p></div><div class="manga-panels">'+beats.map((b,i)=>'<a class="manga-panel manga-panel-'+i+'" href="'+b[4]+'"><span class="manga-panel-number">'+b[0]+'</span><div class="manga-panel-art">'+drawings[i]+'</div><span class="manga-speech">'+b[3]+'</span><div class="manga-panel-copy"><h3>'+b[1]+'</h3><p>'+b[2]+'</p><span class="mono">'+b[5]+' ↗</span></div></a>').join('')+'</div><div class="manga-editor-note"><span>TO BE CONTINUED…</span><p>With every iteration.</p><a href="#team">MEET THE CAST ↗</a></div></div>';
+ document.querySelector('.manifesto').before(story);observer.observe(story);
+ for(const [selector,word,note] of [['#simulations','WHIRR.','THE MACHINE COMES ALIVE'],['#team','ASSEMBLE.','SIX MINDS. ONE SQUAD.']]){
+  const target=document.querySelector(selector),cut=decorative('div','manga-scene-cut');cut.innerHTML='<div class="manga-cut-lines"></div><span>'+note+'</span><strong>'+word+'</strong><small>TF / 187</small>';target.before(cut);observer.observe(cut);
+ }
+ document.querySelector('#profile .modal-top .mono').textContent='TITAN FORGE / CHARACTER FILE';
+ hero.querySelector('.intro').classList.add('manga-dialogue');
+ let queued=false;
+ function update(){queued=false;const max=document.documentElement.scrollHeight-innerHeight,p=max>0?Math.min(1,Math.max(0,scrollY/max)):0;power.style.setProperty('--power',p);power.querySelector('strong').textContent=String(Math.round(p*100)).padStart(2,'0')+'%';if(!reduced.matches&&!document.body.classList.contains('paused'))hero.style.setProperty('--manga-shift',Math.min(scrollY*.12,90)+'px');}
+ addEventListener('scroll',()=>{if(!queued){queued=true;requestAnimationFrame(update);}},{passive:true});addEventListener('resize',update);update();
+ document.querySelector('#hero-ignite').addEventListener('click',()=>{hero.classList.toggle('anime-awakened',document.querySelector('#hero-ignite').getAttribute('aria-pressed')==='true');});
+ if(matchMedia('(pointer:fine)').matches)for(const card of document.querySelectorAll('.module-card,.team .card,.photo-panel')){card.addEventListener('pointermove',event=>{if(reduced.matches||document.body.classList.contains('paused'))return;const r=card.getBoundingClientRect();card.style.setProperty('--panel-x',(event.clientX-r.left)/r.width);});card.addEventListener('pointerleave',()=>card.style.setProperty('--panel-x','.5'));}
+
+ // Ink treatment is reversible, so photographs remain available in their original colour.
+ document.body.classList.add('manga-mode');
+ const inkToggle=document.createElement('button');inkToggle.className='manga-mode-toggle';inkToggle.type='button';inkToggle.textContent='MANGA INK ON';inkToggle.setAttribute('aria-pressed','true');inkToggle.setAttribute('aria-label','Manga ink treatment for photos');
+ inkToggle.addEventListener('click',()=>{const active=document.body.classList.toggle('manga-mode');inkToggle.setAttribute('aria-pressed',String(active));inkToggle.textContent=active?'MANGA INK ON':'ORIGINAL PHOTOS';});document.body.append(inkToggle);
+ const pendingAnimations=new Set();
+ const panelEntrance=new IntersectionObserver(entries=>{for(const entry of entries){if(!entry.isIntersecting)continue;panelEntrance.unobserve(entry.target);if(reduced.matches||document.body.classList.contains('paused'))continue;const animation=entry.target.animate([{opacity:.35,transform:'perspective(1000px) translateY(35px) rotateX(7deg)'},{opacity:1,transform:'perspective(1000px) translateY(0) rotateX(0deg)'}],{duration:720,delay:Number(entry.target.dataset.mangaDelay||0),easing:'cubic-bezier(.16,1,.3,1)'});pendingAnimations.add(animation);animation.onfinish=animation.oncancel=()=>pendingAnimations.delete(animation);}},{threshold:.13});
+ function observePanels(root){root.querySelectorAll('.manga-panel,.module-card,.photo-panel,.card').forEach((panel,i)=>{if(panel.dataset.mangaObserved)return;panel.dataset.mangaObserved='true';panel.dataset.mangaDelay=String((i%3)*85);panelEntrance.observe(panel);});}
+ observePanels(document);
+ new MutationObserver(()=>observePanels(document.querySelector('#cards'))).observe(document.querySelector('#cards'),{childList:true});
+ const ambientObserver=new IntersectionObserver(entries=>entries.forEach(entry=>entry.target.classList.toggle('manga-motion-visible',entry.isIntersecting)),{rootMargin:'60px'});
+ document.querySelectorAll('.manga-scene-cut,.anime-eye-strip,.manga-panel').forEach(node=>ambientObserver.observe(node));
+ function synchronizeMotion(){const freeze=reduced.matches||document.body.classList.contains('paused');for(const animation of pendingAnimations){if(reduced.matches)animation.finish();else if(freeze)animation.pause();else animation.play();}}
+ new MutationObserver(synchronizeMotion).observe(document.body,{attributes:true,attributeFilter:['class']});reduced.addEventListener('change',synchronizeMotion);
+})();
 
 })();
