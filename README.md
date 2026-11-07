@@ -1,16 +1,25 @@
 # Titan Forge / NRL Hyperdrive
 
-The Titan Forge team website: a red, black and white futuristic comic experience built around a photo-referenced Hyperdrive robot. The six-member roster is organized by role. Krishiv’s Captain, Match Strategist & Lead Driver, Ronak’s Lead Programmer, and Nikshith’s Technician & Match Strategist profiles include their supplied introductions and photographs; Neelima Valiveti’s mentor profile includes her supplied photograph, school role and full introduction. The other three member profiles remain ready for their content.
+The Titan Forge team website: a black-and-red technical portfolio assembled by coordinated decorative agents, built around a photo-referenced Hyperdrive robot. The six-member roster is organized by role. Krishiv’s Captain, Match Strategist & Lead Driver, Ronak’s Lead Programmer, and Nikshith’s Technician & Match Strategist profiles include their supplied introductions and photographs; Neelima Valiveti’s mentor profile includes her supplied photograph, school role and full introduction. The other three member profiles remain ready for their content.
 
 ## Open it
 
-Open `Titan-Forge-Preview.html` in Chrome or Edge. It includes the fonts, local Three.js renderer, geometry, prototype photo, poster and video in one file. Extract the ZIP before opening it.
+Use `index.html` and its `assets` directory for the current website. GitHub Pages serves this entry point. The checked-in standalone preview is an older export; run `python3 scripts/build-preview.py` when you need a fresh self-contained export.
 
 For the editable source, open `index.html` with its `assets` directory alongside it. No installation, API key, paid generation service or CDN is required.
 
+## Agentic build experience
+
+- The opening builds real navigation, identity, typography and the interactive robot panel. Three small coloured cursors draw temporary selection rectangles and reveal content in staggered bursts.
+- **Watch the Forge Build** runs a guided tour through arrival, introductions, six profiles, mentor, machine, Hyperdrive and the Instagram invitation. The machine chapter includes the retained systems, motion study, mission and prototype photographs.
+- **Pause / Resume**, **Replay** and **Explore Website** live in an always-available control dock. Wheel, touch, scrollbar movement, keyboard navigation and interactions immediately release the guided tour. Replay restores the six-member directory and opens the playbook.
+- Normal browsing builds visible content briefly. Completed content stays still. Profiles, video controls, game input and robot manipulation remain native user interactions. Videos never autoplay.
+- The overlay is `inert`, `aria-hidden` and `pointer-events:none`. It is suppressed during gameplay, media playback and model manipulation. Mobile uses two cursors and native scrolling; reduced motion exposes everything immediately without a tour.
+- Native Web Animations, IntersectionObserver and one coordinated animation clock supply the choreography without a CDN or a production build step. Source: `assets/agentic-build.js` and `assets/agentic-build.css`.
+
 ## Experiences
 
-- **Initialization:** a skippable comic opening advances with page/model readiness, bypasses itself for reduced motion, and has a five-second fallback.
+- **Initialization:** a short, interruptible agent build replaces the former full-screen comic loader. A six-second CSS fallback ensures an unavailable script cannot conceal the opening.
 - **Hyperdrive match:** the game follows the school identity, team video introductions, profiles and mentor. Drive Red 187 alongside an AI teammate against two blue training bots in a 2:30 active-time match. WASD/arrows steer correctly relative to the robot; Space brakes and Shift enables precision. E picks/places CORE, Q operates the separate PAYLOAD Cargo Bay, H represents the early Human Player STARBURST button, and R changes the selected held CORE. Touch controls, reset, match demo, fullscreen and three cameras are included. High/Star/Apex poles, Golden CORE vaults, STAR MAP bonuses, squad payload bonuses, Space Station endgame states and the final buzzer use the cited manual baseline. Read the on-page **Hyperdrive Playbook** for scoring and legal-action guards.
 - **Engineering explorer:** scrolling separates 290 components and 20 individual wire meshes. Drag to orbit, isolate systems, identify a component, choose camera presets, zoom, enable X-ray or switch to wireframe. Manual sliders remain available.
 - **System dossiers:** four animated panels select the corresponding frame, drive, CORE mechanism or electronics view in the explorer.
@@ -34,7 +43,8 @@ The visual model uses the supplied prototype photos and NRL references. Its hidd
 After editing source files:
 
 ```sh
-python3 scripts/build-preview.py
+python3 scripts/build-preview.py --site-only
+# Omit --site-only to regenerate the large standalone export too.
 ```
 
 This regenerates the portable JavaScript, embeds the stylesheet into `index.html`, and rebuilds the standalone HTML. Do not edit `assets/portable-viewer.js` directly.
@@ -42,8 +52,10 @@ This regenerates the portable JavaScript, embeds the stylesheet into `index.html
 Checks:
 
 ```sh
+npm ci
 node --check assets/portable-viewer.js
-node --test scripts/*.test.mjs
+npm run test:build
+npm test
 ```
 
 To reproduce the CPU-rendered film, install Python/Pillow, a C++ compiler with OpenMP and FFmpeg:
